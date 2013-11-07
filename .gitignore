@@ -2,3 +2,6 @@
 bin/
 target/
 
+# Eclipse project settings
+.settings
+
