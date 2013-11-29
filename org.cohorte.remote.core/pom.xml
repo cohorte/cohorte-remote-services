@@ -1,65 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.cohorte</groupId>
-		<artifactId>cohorte-remote-services</artifactId>
-		<version>1.1.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
-	<artifactId>org.cohorte.remote.core</artifactId>
-	<packaging>bundle</packaging>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.cohorte</groupId>
+        <artifactId>cohorte-remote-services</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>org.cohorte.remote.core</artifactId>
+    <packaging>bundle</packaging>
 
-	<dependencies>
-		<!-- iPOJO Annotations -->
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.ipojo.annotations</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.compendium</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.cohorte</groupId>
-			<artifactId>org.cohorte.remote.api</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
-			<type>bundle</type>
-		</dependency>
-		<dependency>
-			<groupId>org.cohorte</groupId>
-			<artifactId>org.cohorte.remote.utilities</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
-			<type>bundle</type>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <!-- iPOJO Annotations -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo.annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.cohorte</groupId>
+            <artifactId>org.cohorte.remote.api</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cohorte</groupId>
+            <artifactId>org.cohorte.remote.utilities</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Bundle-Name>COHORTE :: Remote Services :: Core</Bundle-Name>
-						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Bundle-Vendor>isandlaTech.com</Bundle-Vendor>
-						<Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Name>COHORTE :: Remote Services :: Core</Bundle-Name>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Vendor>isandlaTech.com</Bundle-Vendor>
+                        <Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
 
-						<Export-Package>org.cohorte.remote;version="1.1.0",
-							org.cohorte.remote.beans;version="1.1.0"</Export-Package>
+                        <Export-Package>org.cohorte.remote;version="1.1.0",
+                            org.cohorte.remote.beans;version="1.1.0"</Export-Package>
 
-						<Import-Package>org.osgi.framework</Import-Package>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+                        <Import-Package>org.osgi.framework</Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
