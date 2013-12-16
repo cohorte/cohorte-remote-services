@@ -8,18 +8,21 @@
             description="Jabsorb Namespace"
             name="ecf.namespace.jabsorb">
       </namespace>
-      <namespace
-            class="org.cohorte.ecf.provider.jabsorb.identity.JabsorbRemoteServiceNamespace"
-            description="Jabsorb Remote Service Namespace"
-            name="ecf.namespace.jabsorb.remoteservice">
-      </namespace>
    </extension>
    <extension
          point="org.eclipse.ecf.containerFactory">
       <containerFactory
             class="org.cohorte.ecf.provider.jabsorb.JabsorbContainerInstantiator"
-            description="Jabsorb Container Instantiator"
-            name="ecf.jabsorb"
+            description="Jabsorb Client Container Instantiator"
+            hidden="false"
+            name="ecf.jabsorb.consumer"
+            server="false">
+      </containerFactory>
+      <containerFactory
+            class="org.cohorte.ecf.provider.jabsorb.host.JabsorbHostContainerInstantiator"
+            description="Jabsorb Host container instantiator"
+            hidden="false"
+            name="ecf.jabsorb.host"
             server="true">
       </containerFactory>
    </extension>
