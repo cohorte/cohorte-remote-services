@@ -4,6 +4,7 @@
 package org.cohorte.ecf.provider.jabsorb.host;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
 import org.eclipse.ecf.core.ContainerCreateException;
@@ -38,14 +39,32 @@ public class JabsorbHostContainerInstantiator extends
             throw new ContainerCreateException("HTTP component not activated");
         }
 
-        // TODO: Make the ID
+        // FIXME: Make the ID
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = (Map<String, Object>) aParameters[0];
+        String id = (String) map.get("id");
+
         System.out.println("Host Cont Inst params = "
                 + Arrays.toString(aParameters));
         ID containerId = IDFactory.getDefault().createID(
-                JabsorbConstants.IDENTITY_NAMESPACE, aParameters);
+                JabsorbConstants.IDENTITY_NAMESPACE, id);
 
         // Create the container instance
         return new JabsorbHostContainer(containerId, httpComponent);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.ecf.core.provider.BaseContainerInstantiator#
+     * getSupportedAdapterTypes(org.eclipse.ecf.core.ContainerTypeDescription)
+     */
+    @Override
+    public String[] getSupportedAdapterTypes(
+            final ContainerTypeDescription description) {
+
+        // Necessary to be called with the ServiceReference parameter
+        return getInterfacesAndAdaptersForClass(JabsorbHostContainer.class);
     }
 
     /*
