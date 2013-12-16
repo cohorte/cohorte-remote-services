@@ -91,8 +91,8 @@ public class JabsorbClientService extends AbstractClientService {
         }
 
         // Create the proxy
-        return pClient.openProxy(getEndpointName(), pLoader,
-                pInterfaces.toArray(new Class<?>[0]));
+        return pClient.openProxy(Utilities.getEndpointName(registration),
+                pLoader, pInterfaces.toArray(new Class<?>[0]));
     }
 
     /**
@@ -110,34 +110,6 @@ public class JabsorbClientService extends AbstractClientService {
         pInterfaces.clear();
 
         super.dispose();
-    }
-
-    /**
-     * Extracts the endpoint name from properties
-     * 
-     * @return The endpoint name
-     * @throws ECFException
-     *             Can't find/generate an endpoint name
-     */
-    private String getEndpointName() throws ECFException {
-
-        // Custom name
-        String endpointName = (String) registration
-                .getProperty(JabsorbConstants.ENDPOINT_NAME);
-        if (endpointName == null || endpointName.isEmpty()) {
-            // Get the remote service ID
-            Long svcId = (Long) registration
-                    .getProperty(JabsorbConstants.ENDPOINT_SERVICE_ID);
-            if (svcId == null || svcId == 0) {
-                // No service ID given
-                throw new ECFException("No endpoint name given");
-            }
-
-            // Generated name
-            endpointName = "service_" + svcId;
-        }
-
-        return endpointName;
     }
 
     /**

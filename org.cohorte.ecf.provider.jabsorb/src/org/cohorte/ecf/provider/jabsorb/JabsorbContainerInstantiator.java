@@ -20,12 +20,6 @@ import org.eclipse.ecf.remoteservice.IRemoteServiceContainerAdapter;
 public class JabsorbContainerInstantiator implements IContainerInstantiator,
         IRemoteServiceContainerInstantiator {
 
-    /** Jabsorb configuration, as in plugin.xml */
-    private static final String JABSORB_CONFIG = "ecf.jabsorb";
-
-    /** Array form of the configuration */
-    private static final String[] JABSORB_CONFIGS = new String[] { JABSORB_CONFIG };
-
     /** Jabsorb intents */
     private static final String[] JABSORB_INTENTS = { "passByValue",
             "exactlyOnce", "ordered" };
@@ -64,8 +58,8 @@ public class JabsorbContainerInstantiator implements IContainerInstantiator,
 
         // Look for Jabsorb configuration in exported ones
         for (String exporterConfig : aExporterSupportedConfigs) {
-            if (JABSORB_CONFIG.equals(exporterConfig)) {
-                return JABSORB_CONFIGS;
+            if (JabsorbConstants.JABSORB_CONFIG.equals(exporterConfig)) {
+                return JabsorbConstants.JABSORB_CONFIGS;
             }
         }
 
@@ -88,7 +82,7 @@ public class JabsorbContainerInstantiator implements IContainerInstantiator,
             final String[] aImportedConfigs,
             final Dictionary aExportedProperties) {
 
-        // Do nothing
+        // TODO: maybe return the Jabsorb URI and endpoint name ?
         return null;
     }
 
@@ -117,7 +111,7 @@ public class JabsorbContainerInstantiator implements IContainerInstantiator,
     public String[] getSupportedConfigs(
             final ContainerTypeDescription aDescription) {
 
-        return JABSORB_CONFIGS;
+        return JabsorbConstants.JABSORB_CONFIGS;
     }
 
     /*

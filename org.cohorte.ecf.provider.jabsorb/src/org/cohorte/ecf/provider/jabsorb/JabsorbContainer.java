@@ -3,7 +3,6 @@
  */
 package org.cohorte.ecf.provider.jabsorb;
 
-import org.cohorte.ecf.provider.jabsorb.identity.JabsorbNamespace;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.core.identity.Namespace;
@@ -49,7 +48,8 @@ public class JabsorbContainer extends AbstractClientContainer implements
     @Override
     public Namespace getConnectNamespace() {
 
-        return IDFactory.getDefault().getNamespaceByName(JabsorbNamespace.NAME);
+        return IDFactory.getDefault().getNamespaceByName(
+                JabsorbConstants.IDENTITY_NAMESPACE);
     }
 
     @Override
