@@ -26,7 +26,7 @@ public interface JabsorbConstants {
     String IDENTITY_NAMESPACE = "ecf.namespace.jabsorb";
 
     /** Jabsorb configuration, as in plugin.xml */
-    String JABSORB_CONFIG = "ecf.jabsorb";
+    String JABSORB_CONFIG = "ecf.jabsorb.host";
 
     /** Array form of the configuration */
     String[] JABSORB_CONFIGS = new String[] { JABSORB_CONFIG };
