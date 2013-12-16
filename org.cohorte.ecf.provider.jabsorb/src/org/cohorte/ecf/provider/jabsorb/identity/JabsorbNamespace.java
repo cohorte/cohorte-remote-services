@@ -4,7 +4,6 @@
 package org.cohorte.ecf.provider.jabsorb.identity;
 
 import java.net.URI;
-import java.util.Arrays;
 
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDCreateException;
@@ -38,9 +37,6 @@ public class JabsorbNamespace extends Namespace {
     @Override
     public ID createInstance(final Object[] parameters)
             throws IDCreateException {
-
-        System.out.println("create install with parameters="
-                + Arrays.toString(parameters));
 
         if (parameters == null || parameters.length != 1) {
             throw new IDCreateException(
