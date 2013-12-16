@@ -24,11 +24,31 @@ import org.osgi.service.http.NamespaceException;
  */
 public class JabsorbHttpServiceComponent extends HttpServiceComponent {
 
+    /** Singleton instance */
+    private static JabsorbHttpServiceComponent sInstance;
+
+    /**
+     * Returns the instance of this component
+     * 
+     * @return The instance of this component
+     */
+    public static JabsorbHttpServiceComponent getInstance() {
+
+        return sInstance;
+    }
+
     /** Registered endpoints */
     private final Set<String> pEndpoints = new LinkedHashSet<String>();
 
     /** The Jabsorb bridge */
     private JSONRPCBridge pJabsorbRpcBridge;
+
+    /**
+     * Empty constructor
+     */
+    public JabsorbHttpServiceComponent() {
+
+    }
 
     /*
      * (non-Javadoc)
@@ -49,6 +69,7 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
 
         // Let the component be activated
         super.activate(aCtxt);
+        sInstance = this;
     }
 
     /*
@@ -91,9 +112,12 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
     @Override
     protected void deactivate() throws Exception {
 
+        System.out.println("deactivate");
+
         // Clean up
         pEndpoints.clear();
         JSONRPCBridge.getSerializer().setClassLoader(null);
+        sInstance = null;
 
         // Deactivate the component
         super.deactivate();

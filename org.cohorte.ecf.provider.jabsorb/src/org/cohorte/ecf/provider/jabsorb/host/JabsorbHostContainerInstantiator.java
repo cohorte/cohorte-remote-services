@@ -32,8 +32,8 @@ public class JabsorbHostContainerInstantiator extends
             final Object[] aParameters) throws ContainerCreateException {
 
         // Get the HTTP component
-        JabsorbHttpServiceComponent httpComponent = (JabsorbHttpServiceComponent) JabsorbHttpServiceComponent
-                .getDefault();
+        JabsorbHttpServiceComponent httpComponent = JabsorbHttpServiceComponent
+                .getInstance();
         if (httpComponent == null) {
             throw new ContainerCreateException("HTTP component not activated");
         }
