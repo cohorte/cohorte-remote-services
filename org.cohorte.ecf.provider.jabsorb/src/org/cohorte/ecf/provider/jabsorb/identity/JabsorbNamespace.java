@@ -6,7 +6,6 @@ package org.cohorte.ecf.provider.jabsorb.identity;
 import java.net.URI;
 import java.util.Arrays;
 
-import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDCreateException;
 import org.eclipse.ecf.core.identity.Namespace;
@@ -25,32 +24,6 @@ public class JabsorbNamespace extends Namespace {
 
     /** Serial UID */
     private static final long serialVersionUID = 1L;
-
-    /** Singleton instance */
-    private static Namespace sInstance;
-
-    /**
-     * Get the singleton of this namespace
-     * 
-     * @return The instance
-     */
-    public static Namespace getDefault() {
-
-        if (sInstance == null) {
-            sInstance = new JabsorbNamespace();
-        }
-
-        return sInstance;
-    }
-
-    /**
-     * Singleton constructor
-     */
-    private JabsorbNamespace() {
-
-        // Set up the namespace
-        initialize(JabsorbConstants.IDENTITY_NAMESPACE, "Jabsorb namespace");
-    }
 
     /**
      * Creates a new ID within this namespace.
