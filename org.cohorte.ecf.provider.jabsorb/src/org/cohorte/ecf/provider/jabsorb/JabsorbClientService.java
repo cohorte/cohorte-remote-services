@@ -30,7 +30,7 @@ public class JabsorbClientService extends AbstractClientService {
     private final Client pClient;
 
     /** Service interfaces */
-    private final List<Class<?>> pInterfaces = new LinkedList<>();
+    private final List<Class<?>> pInterfaces = new LinkedList<Class<?>>();
 
     /** A classloader that walks through bundles */
     private final ClassLoader pLoader;
