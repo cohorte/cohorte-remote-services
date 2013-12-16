@@ -3,9 +3,10 @@
  */
 package org.cohorte.ecf.provider.jabsorb.identity;
 
-import java.net.URISyntaxException;
+import java.net.URI;
 import java.util.Arrays;
 
+import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDCreateException;
 import org.eclipse.ecf.core.identity.Namespace;
@@ -18,9 +19,6 @@ import org.eclipse.ecf.core.identity.Namespace;
  * @author Thomas Calmant
  */
 public class JabsorbNamespace extends Namespace {
-
-    /** Name, as in plugin.xml */
-    public static final String NAME = "ecf.namespace.jabsorb";
 
     /** Namespace scheme */
     public static final String NAMESPACE_SCHEME = "jabsorb";
@@ -51,7 +49,7 @@ public class JabsorbNamespace extends Namespace {
     private JabsorbNamespace() {
 
         // Set up the namespace
-        initialize(NAME, "Jabsorb namespace");
+        initialize(JabsorbConstants.IDENTITY_NAMESPACE, "Jabsorb namespace");
     }
 
     /**
@@ -77,11 +75,15 @@ public class JabsorbNamespace extends Namespace {
         }
 
         try {
-            return new JaborbID((String) parameters[0]);
+            String uriString = getInitStringFromExternalForm(parameters);
+            if (uriString == null) {
+                uriString = (String) parameters[0];
+            }
 
-        } catch (URISyntaxException ex) {
-            // Problem
-            throw new IDCreateException(getName() + " createInstance()", ex);
+            return new JabsorbID(this, URI.create(uriString));
+
+        } catch (Exception e) {
+            throw new IDCreateException("Could not create JabsorbID", e);
         }
     }
 
@@ -94,6 +96,18 @@ public class JabsorbNamespace extends Namespace {
     public String getScheme() {
 
         return NAMESPACE_SCHEME;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.ecf.core.identity.Namespace#getSupportedParameterTypes()
+     */
+    @SuppressWarnings("rawtypes")
+    @Override
+    public Class[][] getSupportedParameterTypes() {
+
+        return new Class[][] { { String.class } };
     }
 
     /*
