@@ -30,7 +30,7 @@ public class Utilities {
             throws ECFException {
 
         return getEndpointName(
-                (String) aDictionary.get(JabsorbConstants.ENDPOINT_NAME),
+                (String) aDictionary.get(JabsorbConstants.PROP_ENDPOINT_NAME),
                 (Long) aDictionary.get(JabsorbConstants.ENDPOINT_SERVICE_ID),
                 (Long) aDictionary.get(Constants.SERVICE_ID));
     }
@@ -51,7 +51,7 @@ public class Utilities {
 
         return getEndpointName(
                 (String) aRegistration
-                        .getProperty(JabsorbConstants.ENDPOINT_NAME),
+                        .getProperty(JabsorbConstants.PROP_ENDPOINT_NAME),
                 (Long) aRegistration
                         .getProperty(JabsorbConstants.ENDPOINT_SERVICE_ID),
                 null);
@@ -72,7 +72,7 @@ public class Utilities {
 
         return getEndpointName(
                 (String) aServiceReference
-                        .getProperty(JabsorbConstants.ENDPOINT_NAME),
+                        .getProperty(JabsorbConstants.PROP_ENDPOINT_NAME),
                 (Long) aServiceReference
                         .getProperty(JabsorbConstants.ENDPOINT_SERVICE_ID),
                 (Long) aServiceReference.getProperty(Constants.SERVICE_ID));

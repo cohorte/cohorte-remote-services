@@ -13,9 +13,6 @@ public interface JabsorbConstants {
     /** Host container name */
     String CONTAINER_HOST = "ecf.jabsorb.host";
 
-    /** Name of the endpoint */
-    String ENDPOINT_NAME = "endpoint.name";
-
     /** Service ID on the remote side */
     String ENDPOINT_SERVICE_ID = "endpoint.service.id ";
 
@@ -33,4 +30,10 @@ public interface JabsorbConstants {
 
     /** Path to the Jabsorb servlet */
     String JABSORB_URI = "ecf.jabsorb.uri";
+
+    /** Name of the endpoint */
+    String PROP_ENDPOINT_NAME = JABSORB_CONFIG + ".name";
+
+    /** Jabsorb property: HTTP accesses (String[]) */
+    String PROP_HTTP_ACCESSES = JABSORB_CONFIG + ".accesses";
 }
