@@ -3,7 +3,14 @@
  */
 package org.cohorte.ecf.provider.jabsorb.host;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Enumeration;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -24,6 +31,10 @@ import org.osgi.service.http.NamespaceException;
  */
 public class JabsorbHttpServiceComponent extends HttpServiceComponent {
 
+    /** Possible HTTP Service properties to get its listening port */
+    private static final String[] HTTP_PORT_PROPERTIES = { "http.port",
+            "org.osgi.service.http.port" };
+
     /** Singleton instance */
     private static JabsorbHttpServiceComponent sInstance;
 
@@ -39,6 +50,9 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
 
     /** Registered endpoints */
     private final Set<String> pEndpoints = new LinkedHashSet<String>();
+
+    /** Ports of the HTTP Services this component is bound to */
+    private final Set<Integer> pHttpPorts = new LinkedHashSet<Integer>();
 
     /** The Jabsorb bridge */
     private JSONRPCBridge pJabsorbRpcBridge;
@@ -72,18 +86,25 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
         sInstance = this;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Declarative-Services - New HTTP Service
      * 
-     * @see
-     * org.eclipse.ecf.remoteservice.servlet.HttpServiceComponent#bindHttpService
-     * (org.osgi.service.http.HttpService)
+     * @param aHttpService
+     *            The HTTP service
+     * @param aProperties
+     *            The service properties
      */
-    @Override
-    protected void bindHttpService(final HttpService aHttpService) {
+    protected void bindHttpService(final HttpService aHttpService,
+            final Map<String, ?> aProperties) {
 
         // Let the parent to the binding
         super.bindHttpService(aHttpService);
+
+        // Get the port
+        final int port = extractHttpPort(aProperties);
+        if (port > 0) {
+            pHttpPorts.add(port);
+        }
 
         // Register the Jabsorb servlet
         try {
@@ -94,10 +115,10 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
             // HTTPSessionFactory
             // .setHTTPSessionProvider(new JabsorbHttpSessionProvider());
 
-        } catch (ServletException ex) {
+        } catch (final ServletException ex) {
             // TODO Auto-generated catch block
             ex.printStackTrace();
-        } catch (NamespaceException ex) {
+        } catch (final NamespaceException ex) {
             // TODO Auto-generated catch block
             ex.printStackTrace();
         }
@@ -124,6 +145,85 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
     }
 
     /**
+     * Tries to extract the port an HTTP service is listening to, according to
+     * its properties
+     * 
+     * @param aProperties
+     *            HTTP Service properties
+     * @return The port it is listening to, or -1
+     */
+    private int extractHttpPort(final Map<String, ?> aProperties) {
+
+        for (final String property : HTTP_PORT_PROPERTIES) {
+            // Get the string value
+            final String portStr = (String) aProperties.get(property);
+            if (portStr != null) {
+                try {
+                    // Convert the string
+                    final int port = Integer.parseInt(portStr);
+                    if (port > 0) {
+                        return port;
+                    }
+
+                } catch (final NumberFormatException ex) {
+                    // Invalid string, continue
+                    continue;
+                }
+            }
+        }
+
+        // No valid integer found
+        return -1;
+    }
+
+    /**
+     * Retrieves all possible accesses to the bound HTTP services
+     * 
+     * @return An array of URI strings, can be empty but never null
+     */
+    public String[] getAccesses() {
+
+        final Set<String> accesses = new LinkedHashSet<String>();
+
+        // Get interfaces
+        try {
+            final Enumeration<NetworkInterface> interfaces = NetworkInterface
+                    .getNetworkInterfaces();
+
+            while (interfaces.hasMoreElements()) {
+                // For each interface...
+                final NetworkInterface netInterface = interfaces.nextElement();
+                final Enumeration<InetAddress> addresses = netInterface
+                        .getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    // For each address of this interface...
+                    final InetAddress address = addresses.nextElement();
+
+                    // Prepare a URI
+                    for (final int port : pHttpPorts) {
+                        try {
+                            accesses.add(new URI("http", null, address
+                                    .getHostAddress(), port,
+                                    JabsorbConstants.HOST_SERVLET_PATH, null,
+                                    null).toString());
+
+                        } catch (final URISyntaxException ex) {
+                            // Bad URI
+                            System.err.println("Bad URI: " + ex);
+                        }
+                    }
+                }
+            }
+
+        } catch (final SocketException ex) {
+            System.err.println("Can't compute socket accesses");
+        }
+
+        // No service available
+        return accesses.toArray(new String[0]);
+    }
+
+    /**
      * Registers a service with the given name
      * 
      * @param aEndpointName
@@ -144,18 +244,25 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
         pJabsorbRpcBridge.registerObject(aEndpointName, aService);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Declarative-Services - HTTP Service gone
      * 
-     * @see
-     * org.eclipse.ecf.remoteservice.servlet.HttpServiceComponent#unbindHttpService
-     * (org.osgi.service.http.HttpService)
+     * @param aHttpService
+     *            The HTTP service
+     * @param aProperties
+     *            The service properties
      */
-    @Override
-    protected void unbindHttpService(final HttpService aHttpService) {
+    protected void unbindHttpService(final HttpService aHttpService,
+            final Map<String, ?> aProperties) {
 
         // Unregister the servlet from the lost service
         aHttpService.unregister(JabsorbConstants.HOST_SERVLET_PATH);
+
+        // Forget the port
+        final int port = extractHttpPort(aProperties);
+        if (port > 0) {
+            pHttpPorts.remove(port);
+        }
 
         // Let the parent clean up
         super.unbindHttpService(aHttpService);
