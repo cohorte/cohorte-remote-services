@@ -56,7 +56,7 @@ public class JabsorbClientService extends AbstractClientService {
         pLoader = new BundlesClassLoader(Activator.getContext());
 
         // Setup the client
-        pClient = setupClient(aRegistration);
+        pClient = setupClient();
 
         // Setup the proxy
         pProxy = createProxy();
@@ -74,11 +74,11 @@ public class JabsorbClientService extends AbstractClientService {
 
         // Load service classes
         pInterfaces.clear();
-        for (String className : registration.getClazzes()) {
+        for (final String className : registration.getClazzes()) {
             try {
                 pInterfaces.add(pLoader.loadClass(className));
 
-            } catch (ClassNotFoundException ex) {
+            } catch (final ClassNotFoundException ex) {
                 // Ignore unknown class
                 System.err.println("Class not loaded: " + className);
             }
@@ -122,9 +122,9 @@ public class JabsorbClientService extends AbstractClientService {
      */
     private Method getMethod(final String aMethodName, final int aNbArgs) {
 
-        for (Class<?> clazz : pInterfaces) {
-            Method[] methods = clazz.getMethods();
-            for (Method method : methods) {
+        for (final Class<?> clazz : pInterfaces) {
+            final Method[] methods = clazz.getMethods();
+            for (final Method method : methods) {
                 // Test method name and number of arguments
                 // Interface methods are public, so no need to check for them
                 if (method.getName().equals(aMethodName)
@@ -152,7 +152,7 @@ public class JabsorbClientService extends AbstractClientService {
             final IRemoteCallable aCallable) throws ECFException {
 
         // Look for the method
-        Method method = getMethod(aCall.getMethod(),
+        final Method method = getMethod(aCall.getMethod(),
                 aCall.getParameters().length);
         if (method == null) {
             throw new ECFException("Can't find a method called "
@@ -164,7 +164,7 @@ public class JabsorbClientService extends AbstractClientService {
             // Call the method
             return pClient.invoke(pProxy, method, aCall.getParameters());
 
-        } catch (Throwable ex) {
+        } catch (final Throwable ex) {
             // Encapsulate the exception
             throw new ECFException("Error calling remote method: "
                     + ex.getMessage(), ex);
@@ -173,14 +173,11 @@ public class JabsorbClientService extends AbstractClientService {
 
     /**
      * Sets up the client according to the registration
-     * 
-     * @param aRegistration
      */
-    private Client setupClient(
-            final RemoteServiceClientRegistration aRegistration) {
+    private Client setupClient() {
 
-        // Get the URI
-        String uri = (String) aRegistration
+        // FIXME: Get the URI
+        final String uri = (String) registration
                 .getProperty(JabsorbConstants.JABSORB_URI);
 
         // Prepare the session
