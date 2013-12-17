@@ -3,6 +3,7 @@
  */
 package org.cohorte.ecf.provider.jabsorb;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.core.provider.IRemoteServiceContainerInstantiator;
 import org.eclipse.ecf.remoteservice.servlet.ServletServerContainerInstantiator;
+import org.osgi.framework.Constants;
 
 /**
  * @author Thomas Calmant
@@ -47,7 +49,20 @@ public class JabsorbContainerInstantiator extends
             throw new ContainerCreateException("HTTP component not activated");
         }
 
-        if (aParameters == null) {
+        // Check parameters
+        if (aParameters == null || aParameters.length == 0) {
+            throw new ContainerCreateException(
+                    "No parameter given to create a Jabsorb container.");
+        }
+
+        // The parameter is a map
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> map = (Map<String, Object>) aParameters[0];
+
+        System.out.println("createInstance-Parameters = "
+                + Arrays.toString(aParameters));
+
+        if (map.containsKey(Constants.SERVICE_IMPORTED)) {
             // Import
             System.out.println("Imported !");
 
@@ -61,10 +76,6 @@ public class JabsorbContainerInstantiator extends
 
         } else {
             System.out.println("Exported !");
-
-            // FIXME: Make the ID
-            @SuppressWarnings("unchecked")
-            final Map<String, Object> map = (Map<String, Object>) aParameters[0];
 
             // Use the given ID
             final String id = (String) map.get("id");
@@ -118,9 +129,8 @@ public class JabsorbContainerInstantiator extends
             final String[] aImportedConfigs,
             final Dictionary aExportedProperties) {
 
-        // TODO: maybe return the Jabsorb URI and endpoint name ?
-        System.out.println("Exported properties: " + aExportedProperties);
-        return null;
+        // Return all properties
+        return aExportedProperties;
     }
 
     /*
