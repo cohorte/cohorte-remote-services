@@ -3,21 +3,29 @@
  */
 package org.cohorte.ecf.provider.jabsorb.host;
 
+import java.util.Dictionary;
 import java.util.Map;
 
 import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
+import org.cohorte.ecf.provider.jabsorb.JabsorbContainer;
 import org.eclipse.ecf.core.ContainerCreateException;
 import org.eclipse.ecf.core.ContainerTypeDescription;
 import org.eclipse.ecf.core.IContainer;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDFactory;
+import org.eclipse.ecf.core.provider.IRemoteServiceContainerInstantiator;
 import org.eclipse.ecf.remoteservice.servlet.ServletServerContainerInstantiator;
 
 /**
  * @author Thomas Calmant
  */
 public class JabsorbHostContainerInstantiator extends
-        ServletServerContainerInstantiator {
+        ServletServerContainerInstantiator implements
+        IRemoteServiceContainerInstantiator {
+
+    /** Supported intents */
+    private static final String[] SUPPORTED_INTENTS = { "passByValue",
+            "exactlyOnce", "ordered" };
 
     /*
      * (non-Javadoc)
@@ -32,22 +40,86 @@ public class JabsorbHostContainerInstantiator extends
             final Object[] aParameters) throws ContainerCreateException {
 
         // Get the HTTP component
-        JabsorbHttpServiceComponent httpComponent = JabsorbHttpServiceComponent
+        final JabsorbHttpServiceComponent httpComponent = JabsorbHttpServiceComponent
                 .getInstance();
         if (httpComponent == null) {
             throw new ContainerCreateException("HTTP component not activated");
         }
 
-        // FIXME: Make the ID
-        @SuppressWarnings("unchecked")
-        Map<String, Object> map = (Map<String, Object>) aParameters[0];
-        String id = (String) map.get("id");
+        if (aParameters == null) {
+            // Import
+            System.out.println("Imported !");
 
-        ID containerId = IDFactory.getDefault().createID(
-                JabsorbConstants.IDENTITY_NAMESPACE, id);
+            // FIXME: Generate an ID
+            final String uuid = "uuid:"
+                    + java.util.UUID.randomUUID().toString();
+            final ID containerID = IDFactory.getDefault().createID(
+                    JabsorbConstants.IDENTITY_NAMESPACE, uuid);
 
-        // Create the container instance
-        return new JabsorbHostContainer(containerId, httpComponent);
+            return new JabsorbContainer(containerID);
+
+        } else {
+            System.out.println("Exported !");
+
+            // FIXME: Make the ID
+            @SuppressWarnings("unchecked")
+            final Map<String, Object> map = (Map<String, Object>) aParameters[0];
+
+            // Use the given ID
+            final String id = (String) map.get("id");
+            final ID containerId = IDFactory.getDefault().createID(
+                    JabsorbConstants.IDENTITY_NAMESPACE, id);
+
+            // Create the container instance
+            return new JabsorbHostContainer(containerId, httpComponent);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.ecf.core.provider.IRemoteServiceContainerInstantiator#
+     * getImportedConfigs(org.eclipse.ecf.core.ContainerTypeDescription,
+     * java.lang.String[])
+     */
+    @Override
+    public String[] getImportedConfigs(
+            final ContainerTypeDescription aDescription,
+            final String[] aExporterSupportedConfigs) {
+
+        if (aExporterSupportedConfigs == null) {
+            return null;
+        }
+
+        // Look for Jabsorb configuration in exported ones
+        for (final String exporterConfig : aExporterSupportedConfigs) {
+            if (JabsorbConstants.JABSORB_CONFIG.equals(exporterConfig)) {
+                return JabsorbConstants.JABSORB_CONFIGS;
+            }
+        }
+
+        // No match
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.ecf.core.provider.IRemoteServiceContainerInstantiator#
+     * getPropertiesForImportedConfigs
+     * (org.eclipse.ecf.core.ContainerTypeDescription, java.lang.String[],
+     * java.util.Dictionary)
+     */
+    @Override
+    @SuppressWarnings("rawtypes")
+    public Dictionary getPropertiesForImportedConfigs(
+            final ContainerTypeDescription aDescription,
+            final String[] aImportedConfigs,
+            final Dictionary aExportedProperties) {
+
+        // TODO: maybe return the Jabsorb URI and endpoint name ?
+        System.out.println("Exported properties: " + aExportedProperties);
+        return null;
     }
 
     /*
@@ -75,5 +147,19 @@ public class JabsorbHostContainerInstantiator extends
             final ContainerTypeDescription aDescription) {
 
         return JabsorbConstants.JABSORB_CONFIGS;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.eclipse.ecf.core.provider.IContainerInstantiator#getSupportedIntents
+     * (org.eclipse.ecf.core.ContainerTypeDescription)
+     */
+    @Override
+    public String[] getSupportedIntents(
+            final ContainerTypeDescription description) {
+
+        return SUPPORTED_INTENTS;
     }
 }
