@@ -11,15 +11,6 @@
    </extension>
    <extension
          point="org.eclipse.ecf.containerFactory">
-         <!--
-      <containerFactory
-            class="org.cohorte.ecf.provider.jabsorb.JabsorbContainerInstantiator"
-            description="Jabsorb Client Container Instantiator"
-            hidden="false"
-            name="ecf.jabsorb.consumer"
-            server="false">
-      </containerFactory>
-      -->
       <containerFactory
             class="org.cohorte.ecf.provider.jabsorb.host.JabsorbHostContainerInstantiator"
             description="Jabsorb Host container instantiator"
