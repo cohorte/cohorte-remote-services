@@ -3,7 +3,6 @@
  */
 package org.cohorte.ecf.provider.jabsorb.host;
 
-import java.util.Arrays;
 import java.util.Map;
 
 import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
@@ -44,8 +43,6 @@ public class JabsorbHostContainerInstantiator extends
         Map<String, Object> map = (Map<String, Object>) aParameters[0];
         String id = (String) map.get("id");
 
-        System.out.println("Host Cont Inst params = "
-                + Arrays.toString(aParameters));
         ID containerId = IDFactory.getDefault().createID(
                 JabsorbConstants.IDENTITY_NAMESPACE, id);
 
