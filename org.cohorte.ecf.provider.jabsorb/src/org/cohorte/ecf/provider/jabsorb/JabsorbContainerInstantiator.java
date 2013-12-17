@@ -1,13 +1,14 @@
 /**
  * 
  */
-package org.cohorte.ecf.provider.jabsorb.host;
+package org.cohorte.ecf.provider.jabsorb;
 
 import java.util.Dictionary;
 import java.util.Map;
 
-import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
-import org.cohorte.ecf.provider.jabsorb.JabsorbContainer;
+import org.cohorte.ecf.provider.jabsorb.client.JabsorbContainer;
+import org.cohorte.ecf.provider.jabsorb.host.JabsorbHostContainer;
+import org.cohorte.ecf.provider.jabsorb.host.JabsorbHttpServiceComponent;
 import org.eclipse.ecf.core.ContainerCreateException;
 import org.eclipse.ecf.core.ContainerTypeDescription;
 import org.eclipse.ecf.core.IContainer;
@@ -19,7 +20,7 @@ import org.eclipse.ecf.remoteservice.servlet.ServletServerContainerInstantiator;
 /**
  * @author Thomas Calmant
  */
-public class JabsorbHostContainerInstantiator extends
+public class JabsorbContainerInstantiator extends
         ServletServerContainerInstantiator implements
         IRemoteServiceContainerInstantiator {
 

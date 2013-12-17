@@ -1,13 +1,16 @@
 /**
  * 
  */
-package org.cohorte.ecf.provider.jabsorb;
+package org.cohorte.ecf.provider.jabsorb.client;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.cohorte.ecf.provider.jabsorb.Activator;
+import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
+import org.cohorte.ecf.provider.jabsorb.Utilities;
 import org.cohorte.remote.utilities.BundlesClassLoader;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.remoteservice.IRemoteCall;

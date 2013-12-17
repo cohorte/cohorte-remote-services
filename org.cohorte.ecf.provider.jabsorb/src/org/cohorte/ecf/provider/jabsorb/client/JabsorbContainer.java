@@ -1,8 +1,9 @@
 /**
  * 
  */
-package org.cohorte.ecf.provider.jabsorb;
+package org.cohorte.ecf.provider.jabsorb.client;
 
+import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.core.identity.Namespace;

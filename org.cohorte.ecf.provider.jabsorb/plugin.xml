@@ -12,7 +12,7 @@
    <extension
          point="org.eclipse.ecf.containerFactory">
       <containerFactory
-            class="org.cohorte.ecf.provider.jabsorb.host.JabsorbHostContainerInstantiator"
+            class="org.cohorte.ecf.provider.jabsorb.JabsorbContainerInstantiator"
             description="Jabsorb Host container instantiator"
             hidden="false"
             name="ecf.jabsorb.host"
