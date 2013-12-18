@@ -179,9 +179,15 @@ public class JabsorbClientService extends AbstractClientService {
      */
     private Client setupClient() {
 
-        // FIXME: Get the URI
-        final String uri = (String) registration
-                .getProperty(JabsorbConstants.JABSORB_URI);
+        // Get the accesses
+        final String[] accesses = (String[]) registration
+                .getProperty(JabsorbConstants.PROP_HTTP_ACCESSES);
+
+        // Get the first one
+        // FIXME: get the first **valid** one...
+        final String uri = accesses[0];
+        System.out.println("Accesses: " + Arrays.toString(accesses));
+        System.out.println("Chosen..: " + uri);
 
         // Prepare the session
         final ISession session = TransportRegistry.i().createSession(uri);
