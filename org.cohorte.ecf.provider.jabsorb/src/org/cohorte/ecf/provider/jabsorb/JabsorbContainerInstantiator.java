@@ -6,7 +6,7 @@ package org.cohorte.ecf.provider.jabsorb;
 import java.util.Dictionary;
 import java.util.Map;
 
-import org.cohorte.ecf.provider.jabsorb.client.JabsorbContainer;
+import org.cohorte.ecf.provider.jabsorb.client.JabsorbClientContainer;
 import org.cohorte.ecf.provider.jabsorb.host.JabsorbHostContainer;
 import org.cohorte.ecf.provider.jabsorb.host.JabsorbHttpServiceComponent;
 import org.eclipse.ecf.core.ContainerCreateException;
@@ -70,7 +70,7 @@ public class JabsorbContainerInstantiator extends
             System.out.println("Imported !");
             System.out.println("Props=" + map);
 
-            return new JabsorbContainer(containerId, map);
+            return new JabsorbClientContainer(containerId, map);
 
         } else {
             System.out.println("Exported !");

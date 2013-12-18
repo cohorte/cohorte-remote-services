@@ -40,7 +40,7 @@ import org.osgi.service.remoteserviceadmin.RemoteConstants;
  * 
  * @author Thomas Calmant
  */
-public class JabsorbContainer extends AbstractClientContainer implements
+public class JabsorbClientContainer extends AbstractClientContainer implements
         IRemoteServiceClientContainerAdapter {
 
     /** Service registration */
@@ -57,7 +57,7 @@ public class JabsorbContainer extends AbstractClientContainer implements
      * @param aProperties
      *            Imported service properties
      */
-    public JabsorbContainer(final ID containerID,
+    public JabsorbClientContainer(final ID containerID,
             final Map<String, Object> aProperties) {
 
         // Set up the container
