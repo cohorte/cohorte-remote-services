@@ -28,9 +28,6 @@ public interface JabsorbConstants {
     /** Array form of the configuration */
     String[] JABSORB_CONFIGS = new String[] { JABSORB_CONFIG };
 
-    /** Path to the Jabsorb servlet */
-    String JABSORB_URI = "ecf.jabsorb.uri";
-
     /** Name of the endpoint */
     String PROP_ENDPOINT_NAME = JABSORB_CONFIG + ".name";
 
