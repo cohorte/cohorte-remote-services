@@ -20,6 +20,7 @@ import org.cohorte.remote.utilities.BundlesClassLoader;
 import org.eclipse.ecf.remoteservice.servlet.HttpServiceComponent;
 import org.jabsorb.ng.JSONRPCBridge;
 import org.jabsorb.ng.JSONRPCServlet;
+import org.jabsorb.ng.client.HTTPSessionFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -77,6 +78,10 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
         // Prepare the bridge
         pJabsorbRpcBridge = JSONRPCBridge.getGlobalBridge();
 
+        // Set the HTTP session provider
+        HTTPSessionFactory
+                .setHTTPSessionProvider(new JabsorbHttpSessionProvider());
+
         // Set the serializer class loader
         JSONRPCBridge.getSerializer().setClassLoader(
                 new BundlesClassLoader(aCtxt));
@@ -110,10 +115,6 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
         try {
             aHttpService.registerServlet(JabsorbConstants.HOST_SERVLET_PATH,
                     new JSONRPCServlet(), null, null);
-
-            // FIXME: Set the HTTP session provider
-            // HTTPSessionFactory
-            // .setHTTPSessionProvider(new JabsorbHttpSessionProvider());
 
         } catch (final ServletException ex) {
             // TODO Auto-generated catch block
