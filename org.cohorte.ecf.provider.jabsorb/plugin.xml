@@ -15,7 +15,7 @@
             class="org.cohorte.ecf.provider.jabsorb.JabsorbContainerInstantiator"
             description="Jabsorb Host container instantiator"
             hidden="false"
-            name="ecf.jabsorb.host"
+            name="ecf.jabsorb"
             server="true">
       </containerFactory>
    </extension>
