@@ -4,6 +4,7 @@
 package org.cohorte.ecf.provider.jabsorb;
 
 import java.util.Dictionary;
+import java.util.regex.Pattern;
 
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.remoteservice.client.RemoteServiceClientRegistration;
@@ -14,6 +15,21 @@ import org.osgi.framework.ServiceReference;
  * @author Thomas Calmant
  */
 public class Utilities {
+
+    /** Access URIs separator */
+    public static final String URI_SEPARATOR = ",";
+
+    /**
+     * Transforms the given string of URIs into a list of URIs
+     * 
+     * @param aAccessProperty
+     *            A string made with {@link #makeAccesses(String[])}
+     * @return An array of URIs (can be empty)
+     */
+    public static String[] getAccesses(final String aAccessProperty) {
+
+        return aAccessProperty.split(Pattern.quote(URI_SEPARATOR));
+    }
 
     /**
      * Generates an endpoint name according to the properties in the given
@@ -106,6 +122,30 @@ public class Utilities {
         }
 
         throw new ECFException("No endpoint name to generate");
+    }
+
+    /**
+     * Prepares a string containing all access URIs, separated by
+     * {@link #URI_SEPARATOR}
+     * 
+     * @param aAccessURIs
+     *            A list of access URIs
+     * @return A string (can be empty)
+     */
+    public static String makeAccesses(final String[] aAccessURIs) {
+
+        final StringBuilder builder = new StringBuilder();
+        for (final String uri : aAccessURIs) {
+            // Separate URIs with a ','
+            builder.append(uri).append(',');
+        }
+
+        // Remove the trailing ','
+        if (builder.length() != 0) {
+            builder.deleteCharAt(builder.length() - 1);
+        }
+
+        return builder.toString();
     }
 
     /**

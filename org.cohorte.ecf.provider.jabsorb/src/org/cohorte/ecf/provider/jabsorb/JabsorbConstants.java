@@ -31,6 +31,6 @@ public interface JabsorbConstants {
     /** Name of the endpoint */
     String PROP_ENDPOINT_NAME = JABSORB_CONFIG + ".name";
 
-    /** Jabsorb property: HTTP accesses (String[]) */
+    /** Jabsorb property: HTTP accesses (comma-separated String) */
     String PROP_HTTP_ACCESSES = JABSORB_CONFIG + ".accesses";
 }

@@ -217,8 +217,8 @@ public class JabsorbClientService extends AbstractClientService {
     private Client setupClient() {
 
         // Get the accesses
-        final String[] accesses = (String[]) registration
-                .getProperty(JabsorbConstants.PROP_HTTP_ACCESSES);
+        final String[] accesses = Utilities.getAccesses((String) registration
+                .getProperty(JabsorbConstants.PROP_HTTP_ACCESSES));
 
         // Get the first one
         // FIXME: get the first **valid** one...

@@ -100,8 +100,9 @@ public class JabsorbHostContainer extends ServletServerContainer implements
         properties.put(JabsorbConstants.PROP_ENDPOINT_NAME, pEndpointName);
 
         // ... HTTP accesses
-        final String[] accesses = pBridge.getAccesses();
-        properties.put(JabsorbConstants.PROP_HTTP_ACCESSES, accesses);
+        final String accessesStr = Utilities
+                .makeAccesses(pBridge.getAccesses());
+        properties.put(JabsorbConstants.PROP_HTTP_ACCESSES, accessesStr);
 
         // Grab the service
         pReference = aServiceReference;
