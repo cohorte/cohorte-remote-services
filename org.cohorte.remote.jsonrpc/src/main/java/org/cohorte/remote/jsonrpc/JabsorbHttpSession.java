@@ -65,6 +65,7 @@ public class JabsorbHttpSession extends HTTPSession {
 
         // Open a connection
         HttpURLConnection httpConnection = null;
+        Scanner scanner = null;
         try {
             // Open the connection and cast it
             final URLConnection connection = pUrl.openConnection();
@@ -94,21 +95,26 @@ public class JabsorbHttpSession extends HTTPSession {
                         + " for URL " + pUrl);
             }
 
-            /*
-             * Read the response content See here for more information :
-             * http://weblogs
-             * .java.net/blog/pat/archive/2004/10/stupid_scanner_1.html
-             */
-            return new Scanner(connection.getInputStream()).useDelimiter("\\A")
-                    .next();
+            // Use a scanner to read the response content See here for more
+            // information:
+            // http://weblogs.java.net/blog/pat/archive/2004/10/stupid_scanner_1.html
+            scanner = new Scanner(connection.getInputStream());
+            scanner.useDelimiter("\\A");
+            return scanner.next();
 
         } catch (final IOException e) {
+            // Convert error class
             throw new ClientError(e);
 
         } finally {
             // In any case, free the connection
             if (httpConnection != null) {
                 httpConnection.disconnect();
+            }
+
+            // ... and close the scanner
+            if (scanner != null) {
+                scanner.close();
             }
         }
     }
