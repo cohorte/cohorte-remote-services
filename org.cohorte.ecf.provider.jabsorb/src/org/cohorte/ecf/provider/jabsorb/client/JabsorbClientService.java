@@ -4,6 +4,7 @@
 package org.cohorte.ecf.provider.jabsorb.client;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -119,18 +120,49 @@ public class JabsorbClientService extends AbstractClientService {
      * Looks for the first method in the service interfaces that has the same
      * name and number of arguments.
      * 
-     * @param aMethodName
-     *            A method name
+     * @param aFullMethodName
+     *            A method name, that be prefixed with the full class name
      * @return A method object or null
      */
-    private Method getMethod(final String aMethodName, final int aNbArgs) {
+    private Method getMethod(final String aFullMethodName, final int aNbArgs) {
 
+        // Extracted method name
+        String methodName;
+
+        // List of classes where to find the method
+        final List<Class<?>> classes = new LinkedList<Class<?>>();
+
+        // Separate class and method names
+        final int methodIndex = aFullMethodName.lastIndexOf('.');
+        if (methodIndex == -1) {
+            // Not found, got the method name only
+            methodName = aFullMethodName;
+
+            // Look into all classes
+            classes.addAll(pInterfaces);
+
+        } else {
+            // Separate names
+            final String className = aFullMethodName.substring(0, methodIndex);
+            methodName = aFullMethodName.substring(methodIndex + 1);
+
+            // Find the valid class
+            for (final Class<?> clazz : pInterfaces) {
+                if (clazz.getName().equals(className)) {
+                    // Look into only one class
+                    classes.add(clazz);
+                    break;
+                }
+            }
+        }
+
+        // Look for the method object
         for (final Class<?> clazz : pInterfaces) {
             final Method[] methods = clazz.getMethods();
             for (final Method method : methods) {
                 // Test method name and number of arguments
-                // Interface methods are public, so no need to check for them
-                if (method.getName().equals(aMethodName)
+                if (Modifier.isPublic(method.getModifiers())
+                        && method.getName().equals(methodName)
                         && method.getParameterTypes().length == aNbArgs) {
                     // Found a match
                     return method;
@@ -154,13 +186,18 @@ public class JabsorbClientService extends AbstractClientService {
     protected Object invokeRemoteCall(final IRemoteCall aCall,
             final IRemoteCallable aCallable) throws ECFException {
 
+        // Normalize parameters
+        Object[] parameters = aCall.getParameters();
+        if (parameters == null) {
+            parameters = new Object[0];
+        }
+
         // Look for the method
-        final Method method = getMethod(aCall.getMethod(),
-                aCall.getParameters().length);
+        final Method method = getMethod(aCall.getMethod(), parameters.length);
         if (method == null) {
             throw new ECFException("Can't find a method called "
-                    + aCall.getMethod() + " with "
-                    + aCall.getParameters().length + " arguments");
+                    + aCall.getMethod() + " with " + parameters.length
+                    + " arguments");
         }
 
         try {
