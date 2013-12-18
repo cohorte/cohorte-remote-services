@@ -3,7 +3,6 @@
  */
 package org.cohorte.ecf.provider.jabsorb;
 
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Map;
 
@@ -59,32 +58,57 @@ public class JabsorbContainerInstantiator extends
         @SuppressWarnings("unchecked")
         final Map<String, Object> map = (Map<String, Object>) aParameters[0];
 
-        System.out.println("createInstance-Parameters = "
-                + Arrays.toString(aParameters));
+        // Check import flag
+        final boolean serviceImported = map
+                .containsKey(Constants.SERVICE_IMPORTED);
 
-        if (map.containsKey(Constants.SERVICE_IMPORTED)) {
+        // Generate an ID
+        final ID containerId = generateID(map, !serviceImported);
+
+        if (serviceImported) {
             // Import
             System.out.println("Imported !");
+            System.out.println("Props=" + map);
 
-            // FIXME: Generate an ID
-            final String uuid = "uuid:"
-                    + java.util.UUID.randomUUID().toString();
-            final ID containerID = IDFactory.getDefault().createID(
-                    JabsorbConstants.IDENTITY_NAMESPACE, uuid);
-
-            return new JabsorbContainer(containerID);
+            return new JabsorbContainer(containerId, map);
 
         } else {
             System.out.println("Exported !");
 
-            // Use the given ID
-            final String id = (String) map.get("id");
-            final ID containerId = IDFactory.getDefault().createID(
-                    JabsorbConstants.IDENTITY_NAMESPACE, id);
-
             // Create the container instance
             return new JabsorbHostContainer(containerId, httpComponent);
         }
+    }
+
+    /**
+     * Uses the ID found in the properties, or generates a random one
+     * 
+     * @param aProperties
+     *            Container instance parameters
+     * @return A Jabsorb ID
+     */
+    private ID generateID(final Map<String, Object> aProperties,
+            final boolean aExport) {
+
+        // Setup the property key that contains the endpoint ID
+        String idKey;
+        if (aExport) {
+            idKey = "id";
+
+        } else {
+            idKey = JabsorbConstants.JABSORB_CONFIG + ".id";
+        }
+
+        // Try to use the given ID
+        String id = (String) aProperties.get(idKey);
+        if (id == null || id.isEmpty()) {
+            // No ID given, generate one
+            id = "uuid:" + java.util.UUID.randomUUID().toString();
+        }
+
+        // Return an ID object
+        return IDFactory.getDefault().createID(
+                JabsorbConstants.IDENTITY_NAMESPACE, id);
     }
 
     /*
