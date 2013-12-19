@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.cohorte</groupId>
+		<artifactId>cohorte-remote-services</artifactId>
+		<version>1.1.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	<artifactId>org.cohorte.ecf.provider.jabsorb</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>eclipse-plugin</packaging>
+
+	<properties>
+		<tycho-version>0.19.0</tycho-version>
+	</properties>
+
+	<repositories>
+		<!-- Eclipse Repository -->
+		<repository>
+			<id>kepler</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/releases/kepler</url>
+		</repository>
+
+		<!-- Eclipse ECF Repository -->
+		<repository>
+			<id>ecf</id>
+			<layout>p2</layout>
+			<url>http://download.ecf-project.org/repo/N-HEAD-sdk.feature/lastSuccessful/archive/site.p2/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<!-- Use Cohorte version of Jabsorb -->
+		<dependency>
+			<groupId>org.cohorte</groupId>
+			<artifactId>org.jabsorb.ng</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Required for the BundleClassLoader -->
+		<dependency>
+			<groupId>org.cohorte</groupId>
+			<artifactId>org.cohorte.remote.utilities</artifactId>
+			<version>1.1.0-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Compile with Tycho -->
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+			</plugin>
+
+			<!-- Consider POM dependencies -->
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<pomDependencies>consider</pomDependencies>
+					<environments>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>x86_64</arch>
+						</environment>
+					</environments>
+				</configuration>
+			</plugin>
+
+			<!-- Compile in Java 1.6 -->
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
