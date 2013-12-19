@@ -13,7 +13,11 @@ import org.cohorte.ecf.provider.jabsorb.Utilities;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.remoteservice.IOSGiRemoteServiceContainerAdapter;
+import org.eclipse.ecf.remoteservice.IRemoteServiceListener;
+import org.eclipse.ecf.remoteservice.IRemoteServiceReference;
 import org.eclipse.ecf.remoteservice.IRemoteServiceRegistration;
+import org.eclipse.ecf.remoteservice.events.IRemoteServiceEvent;
+import org.eclipse.ecf.remoteservice.events.IRemoteServiceUnregisteredEvent;
 import org.eclipse.ecf.remoteservice.servlet.ServletServerContainer;
 import org.osgi.framework.ServiceReference;
 
@@ -21,13 +25,16 @@ import org.osgi.framework.ServiceReference;
  * @author Thomas Calmant
  */
 public class JabsorbHostContainer extends ServletServerContainer implements
-        IOSGiRemoteServiceContainerAdapter {
+        IOSGiRemoteServiceContainerAdapter, IRemoteServiceListener {
 
     /** The Jabsorb bridge */
     private JabsorbHttpServiceComponent pBridge;
 
     /** The endpoint name */
     private String pEndpointName;
+
+    /** Exported service reference */
+    private IRemoteServiceReference pExportedReference;
 
     /** Service reference */
     private ServiceReference<?> pReference;
@@ -40,6 +47,7 @@ public class JabsorbHostContainer extends ServletServerContainer implements
 
         super(aId);
         pBridge = aBridge;
+        addRemoteServiceListener(this);
     }
 
     /*
@@ -51,18 +59,31 @@ public class JabsorbHostContainer extends ServletServerContainer implements
     @Override
     public void dispose() {
 
-        if (pEndpointName != null) {
-            pBridge.unregisterEndpoint(pEndpointName);
-        }
-
-        if (pReference != null) {
-            Activator.getContext().ungetService(pReference);
-        }
+        // Unregister the service, if needed
+        unregisterService();
 
         // Clean up
         pBridge = null;
-        pReference = null;
         super.dispose();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.eclipse.ecf.remoteservice.IRemoteServiceListener#handleServiceEvent
+     * (org.eclipse.ecf.remoteservice.events.IRemoteServiceEvent)
+     */
+    @Override
+    public void handleServiceEvent(final IRemoteServiceEvent aEvent) {
+
+        if (aEvent instanceof IRemoteServiceUnregisteredEvent) {
+            // Got an unregistration event...
+            if (aEvent.getReference().equals(pExportedReference)) {
+                // ... which matches our service
+                unregisterService();
+            }
+        }
     }
 
     /*
@@ -113,6 +134,35 @@ public class JabsorbHostContainer extends ServletServerContainer implements
 
         // Call the parent to make the registration bean
         // ... properties not given to the endpoint description...
-        return super.registerRemoteService(aClazzes, service, properties);
+        final IRemoteServiceRegistration registration = super
+                .registerRemoteService(aClazzes, service, properties);
+
+        // Keep the service reference
+        pExportedReference = registration.getReference();
+
+        return registration;
+    }
+
+    /**
+     * Unregisters the exported service from Jabsorb and releases it
+     */
+    private synchronized void unregisterService() {
+
+        // Unregister the endpoint from Jabsorb
+        if (pEndpointName != null) {
+            pBridge.unregisterEndpoint(pEndpointName);
+        }
+
+        // Release the service
+        if (pReference != null) {
+            Activator.getContext().ungetService(pReference);
+        }
+
+        // Clean up
+        pEndpointName = null;
+        pExportedReference = null;
+        pReference = null;
+
+        System.out.println("Service unregistered !");
     }
 }
