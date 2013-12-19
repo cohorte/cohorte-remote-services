@@ -7,9 +7,6 @@ package org.cohorte.ecf.provider.jabsorb;
  */
 public interface JabsorbConstants {
 
-    /** Client container name */
-    String CONTAINER_CONSUMER = "ecf.jabsorb.consumer";
-
     /** Host container name */
     String CONTAINER_HOST = "ecf.jabsorb";
 
@@ -31,6 +28,6 @@ public interface JabsorbConstants {
     /** Name of the endpoint */
     String PROP_ENDPOINT_NAME = JABSORB_CONFIG + ".name";
 
-    /** Jabsorb property: HTTP accesses (comma-separated String) */
+    /** HTTP accesses (comma-separated URL String) */
     String PROP_HTTP_ACCESSES = JABSORB_CONFIG + ".accesses";
 }
