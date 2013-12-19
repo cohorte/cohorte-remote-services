@@ -17,6 +17,7 @@ import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.core.provider.IRemoteServiceContainerInstantiator;
 import org.eclipse.ecf.remoteservice.servlet.ServletServerContainerInstantiator;
 import org.osgi.framework.Constants;
+import org.osgi.service.remoteserviceadmin.RemoteConstants;
 
 /**
  * @author Thomas Calmant
@@ -90,17 +91,12 @@ public class JabsorbContainerInstantiator extends
     private ID generateID(final Map<String, Object> aProperties,
             final boolean aExport) {
 
-        // Setup the property key that contains the endpoint ID
-        String idKey;
-        if (aExport) {
-            idKey = "id";
-
-        } else {
-            idKey = JabsorbConstants.JABSORB_CONFIG + ".id";
+        String id = null;
+        if (!aExport) {
+            // Grab the endpoint ID value
+            id = (String) aProperties.get(RemoteConstants.ENDPOINT_ID);
         }
 
-        // Try to use the given ID
-        String id = (String) aProperties.get(idKey);
         if (id == null || id.isEmpty()) {
             // No ID given, generate one
             id = "uuid:" + java.util.UUID.randomUUID().toString();
