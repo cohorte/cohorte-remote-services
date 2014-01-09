@@ -3,6 +3,9 @@
 Cohorte-Jabsorb.ng ECF Provider
 ###############################
 
+Released under the Apache Software License 2.0.
+
+
 Compilation
 ***********
 
