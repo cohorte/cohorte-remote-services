@@ -4,8 +4,8 @@
 package org.cohorte.ecf.provider.jabsorb.host;
 
 import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Properties;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.cohorte.ecf.provider.jabsorb.Activator;
 import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
@@ -108,23 +108,6 @@ public class JabsorbHostContainer extends ServletServerContainer implements
                     "Can't generate an endpoint name", ex);
         }
 
-        // Copy properties
-        final Properties properties = new Properties();
-        final Enumeration keys = aProperties.keys();
-        while (keys.hasMoreElements()) {
-            final Object key = keys.nextElement();
-            properties.put(key, aProperties.get(key));
-        }
-
-        // Add Jabsorb provider properties
-        // ... endpoint name
-        properties.put(JabsorbConstants.PROP_ENDPOINT_NAME, pEndpointName);
-
-        // ... HTTP accesses
-        final String accessesStr = Utilities
-                .makeAccesses(pBridge.getAccesses());
-        properties.put(JabsorbConstants.PROP_HTTP_ACCESSES, accessesStr);
-
         // Grab the service
         pReference = aServiceReference;
         final Object service = Activator.getContext().getService(pReference);
@@ -135,12 +118,26 @@ public class JabsorbHostContainer extends ServletServerContainer implements
         // Call the parent to make the registration bean
         // ... properties not given to the endpoint description...
         final IRemoteServiceRegistration registration = super
-                .registerRemoteService(aClazzes, service, properties);
+                .registerRemoteService(aClazzes, service, aProperties);
 
         // Keep the service reference
         pExportedReference = registration.getReference();
 
-        return registration;
+        // Prepare Jabsorb provider properties
+        final Map<String, Object> extraProperties = new LinkedHashMap<String, Object>();
+
+        // ... endpoint name
+        extraProperties.put(JabsorbConstants.PROP_ENDPOINT_NAME, pEndpointName);
+
+        // ... HTTP accesses
+        final String accessesStr = Utilities
+                .makeAccesses(pBridge.getAccesses());
+        extraProperties.put(JabsorbConstants.PROP_HTTP_ACCESSES, accessesStr);
+
+        // Return an extended registration, to add some properties to the
+        // endpoint description
+        return new ExtendedRemoteServiceRegistration(registration,
+                extraProperties);
     }
 
     /**
