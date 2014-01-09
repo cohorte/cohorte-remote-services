@@ -28,6 +28,7 @@ import java.util.Set;
 
 import org.cohorte.ecf.provider.jabsorb.Activator;
 import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
+import org.cohorte.ecf.provider.jabsorb.Utilities;
 import org.cohorte.remote.utilities.BundlesClassLoader;
 import org.eclipse.ecf.core.ContainerConnectException;
 import org.eclipse.ecf.core.identity.ID;
@@ -45,6 +46,7 @@ import org.eclipse.ecf.remoteservice.client.IRemoteServiceClientContainerAdapter
 import org.eclipse.ecf.remoteservice.client.RemoteCallable;
 import org.eclipse.ecf.remoteservice.client.RemoteServiceClientRegistration;
 import org.osgi.framework.Constants;
+import org.osgi.service.log.LogService;
 import org.osgi.service.remoteserviceadmin.RemoteConstants;
 
 /**
@@ -105,8 +107,8 @@ public class JabsorbClientContainer extends AbstractClientContainer implements
         }
 
         // Prepare a class loader
-        final BundlesClassLoader classLoader = new BundlesClassLoader(
-                Activator.getContext());
+        final BundlesClassLoader classLoader = new BundlesClassLoader(Activator
+                .get().getContext());
 
         // Prepare callables and the list of really usable classes
         final Collection<IRemoteCallable[]> callables = new LinkedList<IRemoteCallable[]>();
@@ -127,7 +129,8 @@ public class JabsorbClientContainer extends AbstractClientContainer implements
 
             } catch (final ClassNotFoundException ex) {
                 // Bad luck
-                System.err.println("Couldn't load class " + className);
+                Utilities.log(LogService.LOG_WARNING, "connect", getClass(),
+                        "Couldn't load class " + className);
             }
         }
 
@@ -244,7 +247,10 @@ public class JabsorbClientContainer extends AbstractClientContainer implements
             endpointServiceId = ((Long) rawEndpointServiceId).longValue();
 
         } catch (final ClassCastException ex) {
-            System.err.println("Invalid class from endpoint service ID :" + ex);
+            Utilities
+                    .log(LogService.LOG_WARNING, "forceEndpointServiceId",
+                            getClass(),
+                            "Invalid class from endpoint service ID :" + ex);
             return;
         }
 

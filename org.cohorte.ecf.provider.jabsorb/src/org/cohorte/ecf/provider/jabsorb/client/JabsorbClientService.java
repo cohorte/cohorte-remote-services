@@ -34,6 +34,7 @@ import org.eclipse.ecf.remoteservice.client.RemoteServiceClientRegistration;
 import org.jabsorb.ng.client.Client;
 import org.jabsorb.ng.client.ISession;
 import org.jabsorb.ng.client.TransportRegistry;
+import org.osgi.service.log.LogService;
 
 /**
  * Jabsorb remote service client, based on a Jabsorb {@link Client}
@@ -69,7 +70,7 @@ public class JabsorbClientService extends AbstractClientService {
         super(aContainer, aRegistration);
 
         // Setup the class loader
-        pLoader = new BundlesClassLoader(Activator.getContext());
+        pLoader = new BundlesClassLoader(Activator.get().getContext());
 
         // Setup the client
         pClient = setupClient();
@@ -96,7 +97,8 @@ public class JabsorbClientService extends AbstractClientService {
 
             } catch (final ClassNotFoundException ex) {
                 // Ignore unknown class
-                System.err.println("Class not loaded: " + className);
+                Utilities.log(LogService.LOG_WARNING, "createProxy",
+                        getClass(), "Class not loaded: " + className);
             }
         }
 
@@ -235,8 +237,10 @@ public class JabsorbClientService extends AbstractClientService {
         // Get the first one
         // FIXME: get the first **valid** one...
         final String uri = accesses[0];
-        System.out.println("Accesses: " + Arrays.toString(accesses));
-        System.out.println("Chosen..: " + uri);
+        Utilities
+                .traceDebug("setupClient", getClass(),
+                        "Accesses: " + Arrays.toString(accesses)
+                                + "\nChosen..: " + uri);
 
         // Prepare the session
         final ISession session = TransportRegistry.i().createSession(uri);

@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.servlet.ServletException;
 
 import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
+import org.cohorte.ecf.provider.jabsorb.Utilities;
 import org.cohorte.remote.utilities.BundlesClassLoader;
 import org.eclipse.ecf.remoteservice.servlet.HttpServiceComponent;
 import org.jabsorb.ng.JSONRPCBridge;
@@ -36,6 +37,7 @@ import org.jabsorb.ng.client.HTTPSessionFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.log.LogService;
 
 /**
  * A BluePrint component that keeps track of all registered {@link HttpService}.
@@ -148,8 +150,6 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
     @Override
     protected void deactivate() throws Exception {
 
-        System.out.println("deactivate");
-
         // Clean up
         pEndpoints.clear();
         JSONRPCBridge.getSerializer().setClassLoader(null);
@@ -200,8 +200,8 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
 
         final Set<String> accesses = new LinkedHashSet<String>();
 
-        // Get interfaces
         try {
+            // Get all network interfaces
             final Enumeration<NetworkInterface> interfaces = NetworkInterface
                     .getNetworkInterfaces();
 
@@ -224,14 +224,21 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
 
                         } catch (final URISyntaxException ex) {
                             // Bad URI
-                            System.err.println("Bad URI: " + ex);
+                            Utilities.traceDebug("getAccesses", getClass(),
+                                    "Bad URI: " + ex);
                         }
                     }
                 }
             }
 
         } catch (final SocketException ex) {
-            System.err.println("Can't compute socket accesses");
+            Utilities.log(LogService.LOG_ERROR, "getAccesses", getClass(),
+                    "Can't compute socket accesses");
+        }
+
+        if (accesses.isEmpty()) {
+            Utilities.log(LogService.LOG_ERROR, "getAccesses", getClass(),
+                    "No HTTP access has been found");
         }
 
         // No service available

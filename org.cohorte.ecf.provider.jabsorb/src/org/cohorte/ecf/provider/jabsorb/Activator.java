@@ -15,8 +15,11 @@
  */
 package org.cohorte.ecf.provider.jabsorb;
 
+import org.eclipse.ecf.core.util.SystemLogService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.log.LogService;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Keeps track of the bundle context
@@ -25,17 +28,70 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator implements BundleActivator {
 
+    /** The ID of this plugin */
+    public final static String PLUGIN_ID = "org.cohorte.ecf.provider.jabsorb";
+
+    /** This activator */
+    private static Activator sSingleton;
+
+    /**
+     * Returns the activator singleton
+     * 
+     * @return the activator instance
+     */
+    public static Activator get() {
+
+        return sSingleton;
+    }
+
+    /** The {@link LogService} tracker */
+    private ServiceTracker<LogService, LogService> logServiceTracker = null;
+
     /** Bundle context */
-    private static BundleContext sContext;
+    private BundleContext pContext;
 
     /**
      * Retrieves the bundle context
      * 
      * @return the bundle context
      */
-    public static BundleContext getContext() {
+    public BundleContext getContext() {
 
-        return sContext;
+        return pContext;
+    }
+
+    /**
+     * Retrieves a log service
+     * 
+     * @return A {@link LogService}
+     */
+    private synchronized LogService getLogService() {
+
+        if (logServiceTracker == null) {
+            logServiceTracker = new ServiceTracker<LogService, LogService>(
+                    pContext, LogService.class, null);
+            logServiceTracker.open();
+        }
+
+        LogService logService = logServiceTracker.getService();
+        if (logService == null) {
+            logService = new SystemLogService(PLUGIN_ID);
+        }
+
+        return logService;
+    }
+
+    /**
+     * Logs a message using the log service
+     * 
+     * @param aLevel
+     * @param aMessage
+     * @param aThrowable
+     */
+    public void log(final int aLevel, final String aMessage,
+            final Throwable aThrowable) {
+
+        getLogService().log(aLevel, aMessage, aThrowable);
     }
 
     /*
@@ -48,7 +104,8 @@ public class Activator implements BundleActivator {
     @Override
     public void start(final BundleContext bundleContext) {
 
-        Activator.sContext = bundleContext;
+        sSingleton = this;
+        pContext = bundleContext;
     }
 
     /*
@@ -60,6 +117,12 @@ public class Activator implements BundleActivator {
     @Override
     public void stop(final BundleContext bundleContext) {
 
-        Activator.sContext = null;
+        if (logServiceTracker != null) {
+            logServiceTracker.close();
+            logServiceTracker = null;
+        }
+
+        sSingleton = null;
+        pContext = null;
     }
 }

@@ -126,7 +126,8 @@ public class JabsorbHostContainer extends ServletServerContainer implements
 
         // Grab the service
         pReference = aServiceReference;
-        final Object service = Activator.getContext().getService(pReference);
+        final Object service = Activator.get().getContext()
+                .getService(pReference);
 
         // Register the service to the bridge
         pBridge.registerEndpoint(pEndpointName, service);
@@ -168,14 +169,15 @@ public class JabsorbHostContainer extends ServletServerContainer implements
 
         // Release the service
         if (pReference != null) {
-            Activator.getContext().ungetService(pReference);
+            Activator.get().getContext().ungetService(pReference);
         }
+
+        Utilities.traceDebug("unregisterService", getClass(),
+                "Service at endpoint " + pEndpointName + " unregistered");
 
         // Clean up
         pEndpointName = null;
         pExportedReference = null;
         pReference = null;
-
-        System.out.println("Service unregistered !");
     }
 }

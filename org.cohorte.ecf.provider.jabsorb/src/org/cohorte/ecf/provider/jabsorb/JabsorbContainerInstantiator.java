@@ -84,13 +84,16 @@ public class JabsorbContainerInstantiator extends
 
         if (serviceImported) {
             // Import
-            System.out.println("Imported !");
-            System.out.println("Props=" + map);
+            Utilities.traceDebug("createInstance", getClass(),
+                    "Service imported with ID=" + containerId
+                            + " and properties=" + map);
 
             return new JabsorbClientContainer(containerId, map);
 
         } else {
-            System.out.println("Exported !");
+            // Export
+            Utilities.traceDebug("createInstance", getClass(),
+                    "Service exported (container ID=" + containerId + ")");
 
             // Create the container instance
             return new JabsorbHostContainer(containerId, httpComponent);
