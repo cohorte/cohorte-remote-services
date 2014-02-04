@@ -120,7 +120,7 @@ public class ImportEndpoint {
     /**
      * @return the properties
      */
-    public Map<String, Object> getProperties() {
+    public synchronized Map<String, Object> getProperties() {
 
         return new HashMap<String, Object>(pProperties);
     }
@@ -159,6 +159,19 @@ public class ImportEndpoint {
 
         // Use UID string hash code
         return pUid.hashCode();
+    }
+
+    /**
+     * Updates endpoint properties
+     * 
+     * @param aProperties
+     */
+    public synchronized void setProperties(final Map<String, Object> aProperties) {
+
+        pProperties.clear();
+        if (aProperties != null) {
+            pProperties.putAll(aProperties);
+        }
     }
 
     /**

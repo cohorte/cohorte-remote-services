@@ -53,10 +53,10 @@ public interface IImportsRegistry {
     /**
      * Updates an end point and notifies listeners
      * 
-     * @param aEndpoint
+     * @param aUid
      *            The UID of the end point
      * @param aNewProperties
      *            The new properties of the end point
      */
-    void update(ImportEndpoint aEndpoint, Map<String, Object> aNewProperties);
+    void update(String aUid, Map<String, Object> aNewProperties);
 }
