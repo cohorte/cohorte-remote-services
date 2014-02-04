@@ -16,14 +16,14 @@
 package org.cohorte.remote.multicast.beans;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.cohorte.remote.beans.EndpointDescription;
 import org.cohorte.remote.beans.RemoteServiceRegistration;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,8 +35,8 @@ import org.json.JSONObject;
  */
 public class PelixEndpointDescription {
 
-    /** The kind of end point */
-    private final String pKind;
+    /** The configurations exporting the end point */
+    private final String[] pConfigurations;
 
     /** The name of the end point */
     private final String pName;
@@ -47,16 +47,14 @@ public class PelixEndpointDescription {
     /** The UID of the isolate sending the description */
     private final String pSender;
 
+    /** Server address, used as a format entry in the access URL */
     private String pServerAddress;
 
     /** The specifications of the end point */
-    private final List<String> pSpecifications = new LinkedList<String>();
+    private final String[] pSpecifications;
 
     /** The UID of the end point */
     private final String pUID;
-
-    /** The URL to access the end point */
-    private final String pURL;
 
     /**
      * Parses the given JSON object to construct the bean
@@ -72,29 +70,50 @@ public class PelixEndpointDescription {
         // Basic values
         pSender = aJsonObject.getString("sender");
         pUID = aJsonObject.getString("uid");
-        pKind = aJsonObject.getString("kind");
         pName = aJsonObject.getString("name");
-        pURL = aJsonObject.getString("url");
 
         // Properties
         pProperties = ParseUtils.jsonToMap(aJsonObject
                 .getJSONObject("properties"));
 
+        // Configurations
+        pConfigurations = extractStrings(aJsonObject
+                .getJSONArray("configurations"));
+
         // Specifications
-        for (final Object item : ParseUtils.jsonToList(aJsonObject
-                .getJSONArray("specifications"))) {
-            if (item instanceof CharSequence) {
-                pSpecifications.add(item.toString());
-            }
-        }
+        pSpecifications = extractStrings(aJsonObject
+                .getJSONArray("specifications"));
     }
 
     /**
-     * @return the kind
+     * Extracts the strings from the given JSON array and returns them as an
+     * array of strings
+     * 
+     * @param aJsonArray
+     *            A JSON array
+     * @return A String array
+     * @throws JSONException
+     *             Error parsing the array
      */
-    public String getKind() {
+    private String[] extractStrings(final JSONArray aJsonArray)
+            throws JSONException {
 
-        return pKind;
+        final Collection<String> tempSet = new LinkedList<String>();
+        for (final Object item : ParseUtils.jsonToList(aJsonArray)) {
+            if (item instanceof CharSequence) {
+                tempSet.add(item.toString());
+            }
+        }
+
+        return tempSet.toArray(new String[tempSet.size()]);
+    }
+
+    /**
+     * @return the configurations
+     */
+    public String[] getConfigurations() {
+
+        return Arrays.copyOf(pConfigurations, pConfigurations.length);
     }
 
     /**
@@ -132,9 +151,9 @@ public class PelixEndpointDescription {
     /**
      * @return the specifications
      */
-    public List<String> getSpecifications() {
+    public String[] getSpecifications() {
 
-        return pSpecifications;
+        return Arrays.copyOf(pSpecifications, pConfigurations.length);
     }
 
     /**
@@ -143,20 +162,6 @@ public class PelixEndpointDescription {
     public String getUID() {
 
         return pUID;
-    }
-
-    /**
-     * @return the url
-     */
-    public String getURL() {
-
-        if (pServerAddress != null && !pServerAddress.isEmpty()) {
-            // Replace the "server" variable by the known address
-            return pURL.replace("{server}", pServerAddress);
-        }
-
-        // Return the untouched URL
-        return pURL;
     }
 
     /**
@@ -178,13 +183,9 @@ public class PelixEndpointDescription {
     public RemoteServiceRegistration toRegistration()
             throws MalformedURLException {
 
-        // Parse the access URL
-        final URL url = new URL(getURL());
-
         // Make an end point bean
-        final EndpointDescription endpoint = new EndpointDescription(pKind,
-                pName, url.getProtocol(), url.getPath(), url.getPort());
-        endpoint.resolveHost(pServerAddress);
+        final EndpointDescription endpoint = new EndpointDescription(pUID,
+                pName, getConfigurations());
 
         // Make a registration bean
         return new RemoteServiceRegistration(pSender, pSpecifications,
