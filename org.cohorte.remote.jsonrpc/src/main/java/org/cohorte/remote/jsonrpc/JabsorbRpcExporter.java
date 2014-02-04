@@ -22,8 +22,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.felix.ipojo.annotations.Bind;
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Property;
+import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.cohorte.remote.pelix.ExportEndpoint;
@@ -44,6 +47,9 @@ import org.osgi.service.log.LogService;
  * 
  * @author Thomas Calmant
  */
+@Component(name = "cohorte-remote-exporter-jabsorb-factory")
+@Provides(specifications = IServiceExporter.class)
+@Instantiate(name = "cohorte-remote-exporter-jabsorb")
 public class JabsorbRpcExporter implements IServiceExporter {
 
     /** HTTP service port property */

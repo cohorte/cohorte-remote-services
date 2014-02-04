@@ -22,7 +22,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Property;
+import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.cohorte.remote.pelix.IServiceImporter;
 import org.cohorte.remote.pelix.ImportEndpoint;
@@ -41,6 +44,9 @@ import org.osgi.service.log.LogService;
  * 
  * @author Thomas Calmant
  */
+@Component(name = "cohorte-remote-importer-jabsorb-factory")
+@Provides(specifications = IServiceImporter.class)
+@Instantiate(name = "cohorte-remote-importer-jabsorb")
 public class JabsorbRpcImporter implements IServiceImporter {
 
     /** Supported export configurations */
