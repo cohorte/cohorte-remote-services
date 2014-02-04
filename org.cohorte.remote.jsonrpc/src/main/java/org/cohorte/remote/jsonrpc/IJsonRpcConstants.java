@@ -22,11 +22,17 @@ package org.cohorte.remote.jsonrpc;
 public interface IJsonRpcConstants {
 
     /** Default Jabsorb servlet name */
-    String DEFAULT_SERVLET_NAME = "/JSON-RPC";
+    String DEFAULT_SERVLET_NAME = "/JABSORB-RPC";
 
-    /** The exported configuration : json-rpc */
-    String[] EXPORT_CONFIGS = { "jsonrpc", "json-rpc", "*" };
+    /** The exported configuration : jabsorb-rpc */
+    String[] EXPORT_CONFIGS = { "jabsorb-rpc" };
 
     /** HTTP protocol name */
     String EXPORT_PROTOCOL = "http";
+
+    /** Name of the endpoint */
+    String PROP_ENDPOINT_NAME = "ecf.jabsorb.name";
+
+    /** HTTP accesses (comma-separated String) */
+    String PROP_HTTP_ACCESSES = "ecf.jabsorb.accesses";
 }

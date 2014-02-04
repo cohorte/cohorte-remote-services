@@ -43,7 +43,8 @@ public interface IServiceExporter {
      *             Error using the service
      */
     ExportEndpoint exportService(ServiceReference<?> aReference, String aName,
-            String aFramworkUid) throws BundleException;
+            String aFramworkUid) throws BundleException,
+            IllegalArgumentException;
 
     /**
      * Tests if the exporter can export a service with the given configurations
@@ -75,5 +76,5 @@ public interface IServiceExporter {
      *             Rename refused
      */
     void updateExport(ExportEndpoint aEndpoint, String aNewName,
-            Map<String, Object> aOldProperties);
+            Map<String, Object> aOldProperties) throws IllegalArgumentException;
 }

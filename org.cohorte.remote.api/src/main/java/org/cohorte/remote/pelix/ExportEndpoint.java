@@ -46,7 +46,7 @@ public class ExportEndpoint {
     private final Object pInstance;
 
     /** Endpoint name */
-    private final String pName;
+    private String pName;
 
     /** Service properties */
     private final Map<String, Object> pProperties = new LinkedHashMap<String, Object>();
@@ -276,6 +276,17 @@ public class ExportEndpoint {
         return pUid.hashCode();
     }
 
+    /**
+     * Sets the new name of the endpoint
+     * 
+     * @param aNewName
+     *            The new endpoint name
+     */
+    public void setName(final String aNewName) {
+
+        pName = aNewName;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -287,5 +298,4 @@ public class ExportEndpoint {
         return "ExportEndpoint(uid=" + pUid + ", types=" + pConfigurations
                 + ", specs=" + Arrays.toString(pConfigurations) + ")";
     }
-
 }
