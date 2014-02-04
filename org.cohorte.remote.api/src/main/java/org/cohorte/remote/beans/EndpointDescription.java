@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 isandlaTech
+ * Copyright 2014 isandlaTech
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 package org.cohorte.remote.beans;
 
 import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Arrays;
 
 /**
  * Description of an end point description
@@ -32,23 +31,11 @@ public class EndpointDescription implements Serializable {
     /** End point name, as in service properties (can be null) */
     private String pEndpointName;
 
-    /** Complete end point URI, if needed (e.g. /JSON-RPC/endpointname) */
-    private String pEndpointUri;
+    /** End point UID (mandatory) */
+    private String pEndpointUid;
 
     /** Associated "service.exported.configs" value */
-    private String pExportedConfig;
-
-    /** End point host (resolved by receiver) */
-    private String pHost;
-
-    /** End point node */
-    private String pNode;
-
-    /** Port to join the end point */
-    private int pPort;
-
-    /** End point access protocol (http, ...) */
-    private String pProtocol;
+    private String[] pExportedConfigs;
 
     /**
      * Default constructor
@@ -61,50 +48,20 @@ public class EndpointDescription implements Serializable {
     /**
      * Sets up the end point description
      * 
-     * @param aExportedConfig
-     *            Remote Services exported configurations
+     * @param aEndpointUid
+     *            End point UID (mandatory and unique)
      * @param aEndpointName
      *            End point name, as in service properties (can be null)
-     * @param aProtocol
-     *            Protocol to be used to connect the end point
-     * @param aEndpointUri
-     *            Complete end point URI, if needed (e.g.
-     *            /JSON-RPC/endpointname)
-     * @param aPort
-     *            Port to join the end point
+     * @param aExportedConfigs
+     *            Exported configurations
      */
-    public EndpointDescription(final String aExportedConfig,
-            final String aEndpointName, final String aProtocol,
-            final String aEndpointUri, final int aPort) {
+    public EndpointDescription(final String aEndpointUid,
+            final String aEndpointName, final String[] aExportedConfigs) {
 
-        pExportedConfig = aExportedConfig;
+        pEndpointUid = aEndpointUid;
         pEndpointName = aEndpointName;
-        pProtocol = aProtocol;
-        pEndpointUri = aEndpointUri;
-        pPort = aPort;
 
-        // Set the default host name
-        pNode = "localhost";
-    }
-
-    /**
-     * Returns a URI according to the given informations
-     * 
-     * @param aHost
-     *            The host corresponding to the end point node
-     * @return A URI to contact the end point, null on error
-     */
-    public String computeURI() {
-
-        try {
-            final URI uri = new URI(pProtocol, null, pHost, pPort,
-                    pEndpointUri, null, null);
-            return uri.toString();
-
-        } catch (final URISyntaxException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        setExportedConfigs(aExportedConfigs);
     }
 
     /*
@@ -121,22 +78,8 @@ public class EndpointDescription implements Serializable {
 
         final EndpointDescription other = (EndpointDescription) aObj;
 
-        // End point access
-        if (!safeCompare(pNode, other.pNode)
-                || !safeCompare(pPort, other.pPort)
-                || !safeCompare(pProtocol, other.pProtocol)) {
-            return false;
-        }
-
-        // End point properties
-        if (!safeCompare(pEndpointName, other.pEndpointName)
-                || !safeCompare(pEndpointUri, other.pEndpointUri)
-                || !safeCompare(pExportedConfig, other.pExportedConfig)) {
-            return false;
-        }
-
-        // Finally, test exported interfaces
-        return true;
+        // Equality by UID
+        return pEndpointUid.equals(other.pEndpointUid);
     }
 
     /**
@@ -150,14 +93,13 @@ public class EndpointDescription implements Serializable {
     }
 
     /**
-     * Retrieves the complete end point URI, if needed (e.g.
-     * /JSON-RPC/endpointname)
+     * Retrieves the end point UID, unique and mandatory
      * 
-     * @return the end point URI
+     * @return the endpoint UID
      */
-    public String getEndpointUri() {
+    public String getEndpointUid() {
 
-        return pEndpointUri;
+        return pEndpointUid;
     }
 
     /**
@@ -165,76 +107,16 @@ public class EndpointDescription implements Serializable {
      * 
      * @return the associated "service.exported.configs" value
      */
-    public String getExportedConfig() {
+    public String[] getExportedConfigs() {
 
-        return pExportedConfig;
+        return pExportedConfigs;
     }
 
     /**
-     * Retrieves the end point host
+     * Sets the name of the end point
      * 
-     * @return The end point host
-     */
-    public String getNode() {
-
-        return pNode;
-    }
-
-    /**
-     * Retrieves the port where to join the end point
-     * 
-     * @return the end point port
-     */
-    public int getPort() {
-
-        return pPort;
-    }
-
-    /**
-     * Retrieves the end point access protocol (http, ...)
-     * 
-     * @return The end point access protocol
-     */
-    public String getProtocol() {
-
-        return pProtocol;
-    }
-
-    /**
-     * Sets the end point host according to the node
-     * 
-     * @param aHost
-     *            The end point host
-     */
-    public void resolveHost(final String aHost) {
-
-        pHost = aHost;
-    }
-
-    /**
-     * Safely compares two objects (with equals)
-     * 
-     * @param aObjectA
-     *            Object A
-     * @param aObjectB
-     *            Object B
-     * @return True if objects are equals (or both null)
-     */
-    protected boolean safeCompare(final Object aObjectA, final Object aObjectB) {
-
-        if (aObjectA != null) {
-            return aObjectA.equals(aObjectB);
-        } else if (aObjectB != null) {
-            return aObjectB.equals(aObjectA);
-        } else {
-            // Both null
-            return true;
-        }
-    }
-
-    /**
      * @param aEndpointName
-     *            the endpointName to set
+     *            the name of the end point
      */
     public void setEndpointName(final String aEndpointName) {
 
@@ -242,51 +124,28 @@ public class EndpointDescription implements Serializable {
     }
 
     /**
-     * @param aEndpointUri
-     *            the endpointUri to set
-     */
-    public void setEndpointUri(final String aEndpointUri) {
-
-        pEndpointUri = aEndpointUri;
-    }
-
-    /**
-     * @param aExportedConfig
-     *            the exportedConfig to set
-     */
-    public void setExportedConfig(final String aExportedConfig) {
-
-        pExportedConfig = aExportedConfig;
-    }
-
-    /**
-     * Sets the end point host. Only modifiable value : it may be updated when
-     * received by a discoverer
+     * Sets the end point UID
      * 
-     * @param aHost
-     *            The end point host
+     * @param aEndpointUid
+     *            the UID of the end point
      */
-    public void setNode(final String aHost) {
+    public void setEndpointUid(final String aEndpointUid) {
 
-        pNode = aHost;
+        pEndpointUid = aEndpointUid;
     }
 
     /**
-     * @param aPort
-     *            the port to set
+     * Sets the exported configurations
+     * 
+     * @param aExportedConfigs
+     *            the exported configurations to set
      */
-    public void setPort(final int aPort) {
+    public void setExportedConfigs(final String[] aExportedConfigs) {
 
-        pPort = aPort;
-    }
-
-    /**
-     * @param aProtocol
-     *            the protocol to set
-     */
-    public void setProtocol(final String aProtocol) {
-
-        pProtocol = aProtocol;
+        // Make a copy of the array, to avoid the caller to mess with it
+        final int nbConfigs = aExportedConfigs.length;
+        pExportedConfigs = new String[nbConfigs];
+        System.arraycopy(aExportedConfigs, 0, pExportedConfigs, 0, nbConfigs);
     }
 
     /*
@@ -299,10 +158,9 @@ public class EndpointDescription implements Serializable {
 
         final StringBuilder builder = new StringBuilder();
         builder.append("EndpointDescription(");
-        builder.append("protocol=").append(pProtocol);
-        builder.append(", port=").append(pPort);
-        builder.append(", uri=").append(pEndpointUri);
+        builder.append("uid=").append(pEndpointUid);
         builder.append(", name=").append(pEndpointName);
+        builder.append(", configs=").append(Arrays.toString(pExportedConfigs));
         builder.append(")");
 
         return builder.toString();
