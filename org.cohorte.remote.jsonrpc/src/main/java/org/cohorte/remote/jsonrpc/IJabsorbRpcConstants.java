@@ -19,7 +19,7 @@ package org.cohorte.remote.jsonrpc;
  * @author Thomas Calmant
  * 
  */
-public interface IJsonRpcConstants {
+public interface IJabsorbRpcConstants {
 
     /** Default Jabsorb servlet name */
     String DEFAULT_SERVLET_NAME = "/JABSORB-RPC";

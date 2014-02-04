@@ -81,7 +81,7 @@ public class JabsorbRpcExporter implements IServiceExporter {
 
     /** Name of the Jabsorb servlet */
     @Property(name = "endpoint.servlet.name",
-            value = IJsonRpcConstants.DEFAULT_SERVLET_NAME)
+            value = IJabsorbRpcConstants.DEFAULT_SERVLET_NAME)
     private String pServletName;
 
     /**
@@ -142,7 +142,7 @@ public class JabsorbRpcExporter implements IServiceExporter {
 
         // Prefer the name given in properties, if any
         String name = (String) aReference
-                .getProperty(IJsonRpcConstants.PROP_ENDPOINT_NAME);
+                .getProperty(IJabsorbRpcConstants.PROP_ENDPOINT_NAME);
         if (name == null) {
             name = aName;
         }
@@ -160,10 +160,10 @@ public class JabsorbRpcExporter implements IServiceExporter {
         final Map<String, Object> extraProps = new LinkedHashMap<String, Object>();
 
         // ... endpoint name
-        extraProps.put(IJsonRpcConstants.PROP_ENDPOINT_NAME, name);
+        extraProps.put(IJabsorbRpcConstants.PROP_ENDPOINT_NAME, name);
 
         // ... HTTP Accesses
-        extraProps.put(IJsonRpcConstants.PROP_HTTP_ACCESSES, getAccesses());
+        extraProps.put(IJabsorbRpcConstants.PROP_HTTP_ACCESSES, getAccesses());
 
         // Prepare the endpoint bean
         final ExportEndpoint endpoint = new ExportEndpoint(UUID.randomUUID()

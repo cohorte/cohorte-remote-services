@@ -132,7 +132,7 @@ public class JabsorbRpcImporter implements IServiceImporter {
 
         // Get the access URL
         final String rawAccessUrl = (String) aEndpoint.getProperties().get(
-                IJsonRpcConstants.PROP_HTTP_ACCESSES);
+                IJabsorbRpcConstants.PROP_HTTP_ACCESSES);
         if (rawAccessUrl == null || rawAccessUrl.isEmpty()) {
             pLogger.log(LogService.LOG_WARNING, "No access URL given: "
                     + aEndpoint);
@@ -154,7 +154,7 @@ public class JabsorbRpcImporter implements IServiceImporter {
 
         // Compute the name
         final String name = (String) aEndpoint.getProperties().get(
-                IJsonRpcConstants.PROP_ENDPOINT_NAME);
+                IJabsorbRpcConstants.PROP_ENDPOINT_NAME);
         if (name == null || name.isEmpty()) {
             pLogger.log(LogService.LOG_ERROR, "Remote endpoint has no name: "
                     + aEndpoint);
