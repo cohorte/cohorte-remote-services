@@ -25,7 +25,7 @@ import java.util.Map;
 public interface IExportEndpointListener {
 
     /**
-     * An endpoint has been removed
+     * An export endpoint has been removed
      * 
      * @param aEndpoint
      *            The removed endpoint
@@ -33,12 +33,12 @@ public interface IExportEndpointListener {
     void endpointRemoved(ExportEndpoint aEndpoint);
 
     /**
-     * An endpoint has been discovered
+     * Multiple endpoints have been created for export
      * 
-     * @param aEndpoint
-     *            An import endpoint
+     * @param aEndpoints
+     *            An array of exported endpoints
      */
-    void endpointsAdded(ExportEndpoint[] aEndpoint);
+    void endpointsAdded(ExportEndpoint[] aEndpoints);
 
     /**
      * An endpoint has been updated

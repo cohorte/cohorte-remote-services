@@ -48,7 +48,7 @@ public interface IImportsRegistry {
      * @param aUid
      *            The UID of the end point to unregister
      */
-    void remove(ImportEndpoint aUid);
+    void remove(String aUid);
 
     /**
      * Updates an end point and notifies listeners
