@@ -213,12 +213,10 @@ public class ImportsRegistry implements IImportsRegistry {
     /*
      * (non-Javadoc)
      * 
-     * @see
-     * org.cohorte.remote.pelix.IImportsRegistry#remove(org.cohorte.remote.pelix
-     * .ImportEndpoint)
+     * @see org.cohorte.remote.pelix.IImportsRegistry#remove(java.lang.String)
      */
     @Override
-    public synchronized void remove(final ImportEndpoint aUid) {
+    public synchronized void remove(final String aUid) {
 
         final ImportEndpoint endpoint = pRegistry.remove(aUid);
         if (endpoint == null) {
