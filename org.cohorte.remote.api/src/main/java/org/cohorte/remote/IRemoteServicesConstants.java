@@ -47,6 +47,12 @@ public interface IRemoteServicesConstants {
      */
     String ISOLATE_UID = "cohorte.isolate.uid";
 
+    /**
+     * The UID of the framework that exports the service. This service property
+     * is set by the discoverer, when it parses an end point event packet.
+     */
+    String PROP_FRAMEWORK_UID = "pelix.remote.framework.uid";
+
     /** Imported service flag (boolean) */
     String SERVICE_IMPORTED = "service.imported";
 
