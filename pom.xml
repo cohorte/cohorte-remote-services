@@ -13,7 +13,6 @@
         <module>org.cohorte.remote.utilities</module>
         <module>org.cohorte.remote.core</module>
 	<module>org.cohorte.remote.dispatcher.servlet</module>
-        <module>org.cohorte.remote.repository</module>
         <module>org.cohorte.remote.broadcast.multicast</module>
         <module>org.cohorte.remote.jsonrpc</module>
     </modules>
