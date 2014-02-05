@@ -15,14 +15,12 @@
  */
 package org.cohorte.remote.multicast.beans;
 
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.cohorte.remote.beans.EndpointDescription;
-import org.cohorte.remote.beans.RemoteServiceRegistration;
+import org.cohorte.remote.pelix.ImportEndpoint;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -174,21 +172,15 @@ public class PelixEndpointDescription {
     }
 
     /**
-     * Converts this bean into a remote service registration
+     * Converts this bean into an ImportEndpoint
      * 
-     * @return A RemoteServiceRegistration bean
-     * @throws MalformedURLException
-     *             Invalid end point access URL
+     * @return An ImportEndpoint bean
      */
-    public RemoteServiceRegistration toRegistration()
-            throws MalformedURLException {
+    public ImportEndpoint toImportEndpoint() {
 
-        // Make an end point bean
-        final EndpointDescription endpoint = new EndpointDescription(pUID,
-                pName, getConfigurations());
-
-        // Make a registration bean
-        return new RemoteServiceRegistration(pSender, pSpecifications,
-                pProperties, Arrays.asList(endpoint));
+        final ImportEndpoint endpoint = new ImportEndpoint(pUID, pSender,
+                pConfigurations, pName, pSpecifications, pProperties);
+        endpoint.setServer(pServerAddress);
+        return endpoint;
     }
 }

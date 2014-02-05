@@ -46,11 +46,14 @@ public interface IPacketConstants {
     /** Port to the servlet HTTP server */
     String KEY_ACCESS_PORT = "port";
 
-    /** New properties of an updated service */
+    /** New properties of an updated endpoint */
     String KEY_ENDPOINT_NEW_PROPERTIES = "new_properties";
 
-    /** The UID of an end point */
+    /** The UID of an endpoint */
     String KEY_ENDPOINT_UID = "uid";
+
+    /** The UIDs of multiple endpoints */
+    String KEY_ENDPOINT_UIDS = "uids";
 
     /** The kind of event */
     String KEY_EVENT = "event";

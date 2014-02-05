@@ -1,5 +1,5 @@
 /**
- * Copyright 2013 isandlaTech
+ * Copyright 2014 isandlaTech
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,12 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
@@ -38,41 +40,37 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.ServiceController;
 import org.apache.felix.ipojo.annotations.Validate;
-import org.cohorte.remote.IRemoteServiceBroadcaster;
-import org.cohorte.remote.IRemoteServiceEventListener;
-import org.cohorte.remote.IRemoteServiceRepository;
 import org.cohorte.remote.IRemoteServicesConstants;
-import org.cohorte.remote.beans.RemoteServiceEvent;
-import org.cohorte.remote.beans.RemoteServiceEvent.ServiceEventType;
-import org.cohorte.remote.beans.RemoteServiceRegistration;
 import org.cohorte.remote.multicast.beans.PelixEndpointDescription;
 import org.cohorte.remote.multicast.beans.PelixMulticastPacket;
 import org.cohorte.remote.multicast.utils.IPacketListener;
 import org.cohorte.remote.multicast.utils.MulticastHandler;
+import org.cohorte.remote.pelix.ExportEndpoint;
+import org.cohorte.remote.pelix.IExportEndpointListener;
+import org.cohorte.remote.pelix.IExportsDispatcher;
+import org.cohorte.remote.pelix.IImportsRegistry;
+import org.cohorte.remote.pelix.ImportEndpoint;
 import org.cohorte.remote.utilities.RSUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
 
 /**
- * Multicast/servlet remote service discovery, compatible with the Pelix remote
- * services implementation
+ * Remote services discovery based on Multicast packets
  * 
  * @author Thomas Calmant
  */
-@Component(name = "cohorte-remote-broadcast-multicast")
-@Provides(specifications = IRemoteServiceBroadcaster.class)
-public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
+@Component(name = "cohorte-remote-discovery-muticast-factory")
+@Provides(specifications = IExportEndpointListener.class)
+public class MulticastDiscovery implements IExportEndpointListener,
         IPacketListener {
 
     /** UTF-8 charset name */
     private static final String CHARSET_UTF8 = "UTF-8";
-
-    /** HTTP 200 OK */
-    private static final int HTTP_OK = 200;
 
     /** HTTP service port property */
     private static final String HTTP_SERVICE_PORT = "org.osgi.service.http.port";
@@ -83,6 +81,13 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
     /** The bundle context */
     private final BundleContext pBundleContext;
 
+    /** Exported endpoints dispatcher */
+    @Requires
+    private IExportsDispatcher pDispatcher;
+
+    /** Framework UID */
+    private String pFrameworkUID;
+
     /** The HTTP server port */
     private int pHttpPort;
 
@@ -90,13 +95,7 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
     @Requires(id = IPOJO_ID_HTTP, filter = "(" + HTTP_SERVICE_PORT + "=*)")
     private HttpService pHttpService;
 
-    /** End point UID -&gt; Remote Service Registration */
-    private final Map<String, RemoteServiceRegistration> pImportedEndpoints = new LinkedHashMap<String, RemoteServiceRegistration>();
-
-    /** The isolate UID */
-    private String pIsolateUID;
-
-    /** The logger */
+    /** Log service */
     @Requires
     private LogService pLogger;
 
@@ -112,13 +111,9 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
     @Property(name = "multicast.port", value = "42000")
     private int pMulticastPort;
 
-    /** Remote service events listeners */
-    @Requires(optional = true)
-    private IRemoteServiceEventListener[] pRemoteEventsListeners;
-
-    /** The remote service repository */
+    /** Imported services registry */
     @Requires
-    private IRemoteServiceRepository pRepository;
+    private IImportsRegistry pRegistry;
 
     /** The service controller: active only if the validation succeeded */
     @ServiceController
@@ -137,7 +132,7 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
      * @param aBundleContext
      *            The bundle context
      */
-    public MulticastBroadcaster(final BundleContext aBundleContext) {
+    public MulticastDiscovery(final BundleContext aBundleContext) {
 
         pBundleContext = aBundleContext;
     }
@@ -170,6 +165,80 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
                     + rawPort);
             pHttpPort = -1;
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.cohorte.remote.pelix.IExportEndpointListener#endpointRemoved(org.
+     * cohorte.remote.pelix.ExportEndpoint)
+     */
+    @Override
+    public void endpointRemoved(final ExportEndpoint aEndpoint) {
+
+        sendPacket(makeEndpointMap(IPacketConstants.EVENT_REMOVE, aEndpoint));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.cohorte.remote.pelix.IExportEndpointListener#endpointsAdded(org.cohorte
+     * .remote.pelix.ExportEndpoint[])
+     */
+    @Override
+    public void endpointsAdded(final ExportEndpoint[] aEndpoints) {
+
+        sendPacket(makeEndpointsMap(IPacketConstants.EVENT_ADD, aEndpoints));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.cohorte.remote.pelix.IExportEndpointListener#endpointUpdated(org.
+     * cohorte.remote.pelix.ExportEndpoint, java.util.Map)
+     */
+    @Override
+    public void endpointUpdated(final ExportEndpoint aEndpoint,
+            final Map<String, Object> aOldProperties) {
+
+        sendPacket(makeEndpointMap(IPacketConstants.EVENT_UPDATE, aEndpoint));
+    }
+
+    /**
+     * Replaces in-place export properties by import ones
+     * 
+     * @param aFrameworkUID
+     *            The UID of the framework exporting the service
+     * @param aProperties
+     *            Endpoint properties
+     * @return The filtered properties (same object as second parameter)
+     */
+    private Map<String, Object> filterProperties(final String aFrameworkUID,
+            final Map<String, Object> aProperties) {
+
+        // Add the "imported" property
+        aProperties.put(Constants.SERVICE_IMPORTED, true);
+
+        // Replace the "exported configs"
+        final Object configs = aProperties
+                .remove(Constants.SERVICE_EXPORTED_CONFIGS);
+        if (configs != null) {
+            aProperties.put(Constants.SERVICE_IMPORTED_CONFIGS, configs);
+        }
+
+        // Clear other export properties
+        aProperties.remove(Constants.SERVICE_EXPORTED_INTENTS);
+        aProperties.remove(Constants.SERVICE_EXPORTED_INTENTS_EXTRA);
+        aProperties.remove(Constants.SERVICE_EXPORTED_INTERFACES);
+
+        // Add the framework UID
+        aProperties.put(IRemoteServicesConstants.PROP_FRAMEWORK_UID,
+                aFrameworkUID);
+
+        return aProperties;
     }
 
     /**
@@ -206,7 +275,7 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
 
             // Flush the request
             final int responseCode = httpConnection.getResponseCode();
-            if (responseCode != HTTP_OK) {
+            if (responseCode != HttpServletResponse.SC_OK) {
                 // Incorrect answer
                 pLogger.log(LogService.LOG_WARNING, "Error: " + url
                         + " responded with code " + responseCode);
@@ -235,13 +304,19 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
     }
 
     /**
+     * Retrieves the description of an endpoint from a dispatcher servlet
+     * 
      * @param aAddress
+     *            Address of the server hosting the servlet
      * @param aPort
+     *            Port the server is listening to
      * @param aPath
+     *            Path to the servlet
      * @param aEndpointUID
-     * @return The description of the given Pelix end point
+     *            UID of an endpoint
+     * @return The description of the endpoint, or null
      */
-    private RemoteServiceRegistration grabEndpoint(final InetAddress aAddress,
+    private ImportEndpoint grabEndpoint(final InetAddress aAddress,
             final int aPort, final String aPath, final String aEndpointUID) {
 
         // Get the raw servlet result
@@ -262,8 +337,7 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
             final PelixEndpointDescription endpoint = new PelixEndpointDescription(
                     rawEndpoint);
             endpoint.setServerAddress(aAddress.getHostAddress());
-
-            return endpoint.toRegistration();
+            return endpoint.toImportEndpoint();
 
         } catch (final JSONException ex) {
             // Invalid response
@@ -271,41 +345,9 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
                     "Invalid response from the server " + aAddress
                             + " for end point " + aEndpointUID + "\n"
                             + rawResponse, ex);
-
-        } catch (final MalformedURLException ex) {
-            // Invalid end point URL
-            pLogger.log(LogService.LOG_WARNING, "Invalid end point URL for "
-                    + aEndpointUID + "\n" + rawResponse, ex);
         }
 
         return null;
-    }
-
-    /**
-     * Handles the end points sent by a discovered framework
-     * 
-     * @param aEndpoints
-     *            The parsed end points
-     */
-    protected void handleDiscovered(
-            final List<PelixEndpointDescription> aEndpoints) {
-
-        for (final PelixEndpointDescription endpoint : aEndpoints) {
-
-            try {
-                final RemoteServiceEvent regEvent = new RemoteServiceEvent(
-                        ServiceEventType.REGISTERED, endpoint.toRegistration());
-                for (final IRemoteServiceEventListener listener : pRemoteEventsListeners) {
-                    listener.handleRemoteEvent(regEvent);
-                }
-
-            } catch (final MalformedURLException ex) {
-                // Bad content
-                pLogger.log(LogService.LOG_WARNING,
-                        "Invalid end point URL for " + endpoint.getUID() + "\n"
-                                + endpoint, ex);
-            }
-        }
     }
 
     /*
@@ -327,138 +369,47 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
     }
 
     /**
-     * Handles a remote service event packet
+     * Handles an endpoint event packet
      * 
      * @param aEndpointPacket
-     *            Received end point packet
-     * @param aAddress
+     *            The received packet
+     * @param aSenderAddress
      *            Sender address
-     * @param aPort
-     *            Sender port
      */
     private void handleEvent(final PelixMulticastPacket aEndpointPacket,
-            final InetAddress aAddress, final int aPort) {
+            final InetAddress aSenderAddress) {
 
         final String event = aEndpointPacket.getEvent();
-        final String endpointUID = aEndpointPacket.getUID();
-
         if (IPacketConstants.EVENT_ADD.equals(event)) {
-            // Store the new service
-            handleEventAdd(endpointUID, aEndpointPacket, aAddress);
+            // New endpoints
+            final String path = aEndpointPacket.getAccessPath();
+            final int port = aEndpointPacket.getAccessPort();
+
+            for (final String uid : aEndpointPacket.getUIDs()) {
+                // Grab each endpoint
+                final ImportEndpoint endpoint = grabEndpoint(aSenderAddress,
+                        port, path, uid);
+                if (endpoint != null) {
+                    pRegistry.add(endpoint);
+                }
+            }
 
         } else if (IPacketConstants.EVENT_REMOVE.equals(event)) {
-            // Remove it
-            handleEventRemove(endpointUID);
+            // Endpoint removed
+            pRegistry.remove(aEndpointPacket.getUID());
 
         } else if (IPacketConstants.EVENT_UPDATE.equals(event)) {
-            // Update it
-            handleEventUpdate(endpointUID, aEndpointPacket);
+            // Endpoint updated
+            final String frameworkUid = aEndpointPacket.getSender();
+            final Map<String, Object> newProperties = aEndpointPacket
+                    .getNewProperties();
+            filterProperties(frameworkUid, newProperties);
+            pRegistry.update(aEndpointPacket.getUID(), newProperties);
 
         } else {
-            // Unknown...
-            pLogger.log(LogService.LOG_WARNING,
-                    "Unknown kind of remote service event: " + event);
-        }
-    }
-
-    /**
-     * Handles a registered end point event
-     * 
-     * @param aEndpointUID
-     *            The UID of the registered end point
-     * @param aEndpointPacket
-     *            Received packet content
-     * @param aAddress
-     *            Sender address
-     */
-    private void handleEventAdd(final String aEndpointUID,
-            final PelixMulticastPacket aEndpointPacket,
-            final InetAddress aAddress) {
-
-        // Check if the end point is already known
-        if (pImportedEndpoints.containsKey(aEndpointUID)) {
-            // Nothing to do
-            return;
-        }
-
-        // Get the access to the dispatcher servlet
-        final String path = aEndpointPacket.getAccessPath();
-        final int port = aEndpointPacket.getAccessPort();
-
-        // Grab the end point
-        final RemoteServiceRegistration registration = grabEndpoint(aAddress,
-                port, path, aEndpointUID);
-
-        if (registration != null) {
-            // Store the service registration
-            pImportedEndpoints.put(aEndpointUID, registration);
-
-            // Notify listeners
-            final RemoteServiceEvent remoteEvent = new RemoteServiceEvent(
-                    ServiceEventType.REGISTERED, registration);
-            for (final IRemoteServiceEventListener listener : pRemoteEventsListeners) {
-                listener.handleRemoteEvent(remoteEvent);
-            }
-        }
-    }
-
-    /**
-     * Handles an unregistered end point event
-     * 
-     * @param aEndpointUID
-     *            The UID of the unregistered end point
-     */
-    private void handleEventRemove(final String aEndpointUID) {
-
-        // Find the associated registration
-        final RemoteServiceRegistration registration = pImportedEndpoints
-                .remove(aEndpointUID);
-        if (registration == null) {
-            pLogger.log(LogService.LOG_DEBUG, "Unknown end point UID: "
-                    + aEndpointUID);
-            return;
-        }
-
-        // Notify listeners
-        final RemoteServiceEvent remoteEvent = new RemoteServiceEvent(
-                ServiceEventType.UNREGISTERED, registration);
-        for (final IRemoteServiceEventListener listener : pRemoteEventsListeners) {
-            listener.handleRemoteEvent(remoteEvent);
-        }
-    }
-
-    /**
-     * Handles a registered end point event
-     * 
-     * @param aEndpointUID
-     *            The UID of the registered end point
-     * @param aEndpointPacket
-     *            Received packet content
-     */
-    private void handleEventUpdate(final String aEndpointUID,
-            final PelixMulticastPacket aEndpointPacket) {
-
-        // Find the associated registration
-        final RemoteServiceRegistration registration = pImportedEndpoints
-                .remove(aEndpointUID);
-        if (registration == null) {
-            pLogger.log(LogService.LOG_DEBUG, "Unknown end point UID: "
-                    + aEndpointUID);
-            return;
-        }
-
-        // New service properties (they will be filtered by listeners)
-        final Map<String, Object> newProperties = aEndpointPacket
-                .getNewProperties();
-
-        // Update the registration
-        registration.setServiceProperties(newProperties);
-
-        // Notify listeners
-        final RemoteServiceEvent remoteEvent = new RemoteServiceEvent(
-                ServiceEventType.MODIFIED, registration);
-        for (final IRemoteServiceEventListener listener : pRemoteEventsListeners) {
-            listener.handleRemoteEvent(remoteEvent);
+            // Unknown event
+            pLogger.log(LogService.LOG_WARNING, "Unknown multicast event: "
+                    + event);
         }
     }
 
@@ -498,7 +449,7 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
         }
 
         // Avoid handling our own packets
-        if (endpointPacket.isFromSender(pIsolateUID)) {
+        if (endpointPacket.isFromSender(pFrameworkUID)) {
             return;
         }
 
@@ -517,7 +468,7 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
 
         } else {
             // Handle an end point event
-            handleEvent(endpointPacket, senderAddress, senderPort);
+            handleEvent(endpointPacket, senderAddress);
         }
     }
 
@@ -548,55 +499,114 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
         pLogger.log(LogService.LOG_INFO, "Multicast broadcaster gone");
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Prepares the common part of multicast events, including the access to the
+     * servlet
      * 
-     * @see org.cohorte.remote.IRemoteServiceBroadcaster#requestAllEndpoints()
+     * @param aEvent
+     *            Kind of event (see {@link IPacketConstants})
+     * @return A map with basic informations
      */
-    @Override
-    public RemoteServiceEvent[] requestAllEndpoints() {
+    private Map<String, Object> makeBasicMap(final String aEvent) {
 
-        // Send a global discovery packet
-        sendDiscovery();
+        final Map<String, Object> result = new LinkedHashMap<String, Object>();
+        result.put(IPacketConstants.KEY_SENDER, pFrameworkUID);
+        result.put(IPacketConstants.KEY_EVENT, aEvent);
 
-        // Asynchronous mode: return null and wait for future responses
-        return null;
-    }
+        // Set the servlet access
+        final Map<String, Object> access = new LinkedHashMap<String, Object>();
+        access.put(IPacketConstants.KEY_ACCESS_PATH, pServletPath);
+        access.put(IPacketConstants.KEY_ACCESS_PORT, pHttpPort);
+        result.put(IPacketConstants.KEY_ACCESS, access);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.cohorte.remote.IRemoteServiceBroadcaster#requestEndpoints(java.lang
-     * .String)
-     */
-    @Override
-    public RemoteServiceEvent[] requestEndpoints(final String aIsolateUID) {
-
-        // FIXME Send a targeted discovery packet
-        sendDiscovery();
-
-        // Asynchronous mode: return null and wait for future responses
-        return null;
+        return result;
     }
 
     /**
-     * Sends the exported end points to the dispatcher servlet of another
-     * framework
+     * Prepares an event packet containing a single endpoint
      * 
-     * @param aAddress
-     *            Address of the other framework
-     * @param aPort
-     *            HTTP server port of the other framework
-     * @param aPath
-     *            Path to the dispatcher servlet of the other framework
+     * @param aEvent
+     *            Kind of event (update or remove)
+     * @param aEndpoint
+     *            An ExportEndpoint bean
+     * @return The content of an event packet
      */
-    private void sendDiscovered(final String aAddress, final int aPort,
+    private Map<String, Object> makeEndpointMap(final String aEvent,
+            final ExportEndpoint aEndpoint) {
+
+        // Prepare basic information
+        final Map<String, Object> packet = makeBasicMap(aEvent);
+
+        // Add endpoint information
+        packet.put(IPacketConstants.KEY_ENDPOINT_UID, aEndpoint.getUid());
+
+        // Update
+        if (IPacketConstants.EVENT_UPDATE.equals(aEvent)) {
+            packet.put(IPacketConstants.KEY_ENDPOINT_NEW_PROPERTIES,
+                    aEndpoint.getProperties());
+        }
+
+        return packet;
+    }
+
+    /**
+     * Prepares an event packet containing a multiple endpoints
+     * 
+     * @param aEvent
+     *            Kind of event (add)
+     * @param aEndpoints
+     *            An array of ExportEndpoint beans
+     * @return The content of an event packet
+     */
+    private Map<String, Object> makeEndpointsMap(final String aEvent,
+            final ExportEndpoint[] aEndpoints) {
+
+        // Prepare basic information
+        final Map<String, Object> packet = makeBasicMap(aEvent);
+
+        // Add endpoint information
+        final String[] uids = new String[aEndpoints.length];
+        for (int i = 0; i < aEndpoints.length; i++) {
+            uids[i] = aEndpoints[i].getUid();
+        }
+
+        packet.put(IPacketConstants.KEY_ENDPOINT_UIDS, uids);
+        return packet;
+    }
+
+    /**
+     * Sends a "discovered" JHTTP POST request to the dispatcher servlet of the
+     * framework that has been discovered
+     * 
+     * @param aHost
+     *            Address of the discovered framework
+     * @param aPort
+     *            Port of the HTTP server of the sender
+     * @param aPath
+     *            Path to the dispatcher servlet
+     */
+    public void sendDiscovered(final String aHost, final int aPort,
             final String aPath) {
+
+        // Prepare our endpoints
+        final Collection<Map<String, Object>> endpointsMaps = new LinkedList<>();
+        for (final ExportEndpoint endpoint : pDispatcher.getEndpoints()) {
+            endpointsMaps.add(endpoint.toMap());
+        }
+
+        // Convert the list to JSON
+        final String data = new JSONArray(endpointsMaps).toString();
+
+        // Prepare the path to the servlet endpoints
+        final StringBuilder servletPath = new StringBuilder(aPath);
+        if (!aPath.endsWith("/")) {
+            servletPath.append("/");
+        }
+        servletPath.append("endpoints");
 
         final URL url;
         try {
-            url = new URL("http", aAddress, aPort, aPath);
+            url = new URL("http", aHost, aPort, aPath);
 
         } catch (final MalformedURLException ex) {
             pLogger.log(LogService.LOG_ERROR,
@@ -604,13 +614,8 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
             return;
         }
 
-        // Compute the content of the packet
-        final JSONArray endpoints = pServlet.getJsonEndpoints();
-        final String data = endpoints.toString();
-
-        // Open the connection
+        // Send a POST request
         HttpURLConnection httpConnection = null;
-
         try {
             httpConnection = (HttpURLConnection) url.openConnection();
 
@@ -664,83 +669,11 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
     }
 
     /**
-     * Sends a discovery request on the multicast group
+     * Sends a discovery packet, requesting others to indicate their services
      */
     private void sendDiscovery() {
 
-        // Prepare the content
-        final Map<String, Object> content = new HashMap<String, Object>();
-        content.put(IPacketConstants.KEY_EVENT,
-                IPacketConstants.EVENT_DISCOVERY);
-        content.put(IPacketConstants.KEY_SENDER, pIsolateUID);
-
-        final Map<String, Object> access = new HashMap<String, Object>();
-        access.put(IPacketConstants.KEY_ACCESS_PATH, pServletPath);
-        access.put(IPacketConstants.KEY_ACCESS_PORT, pHttpPort);
-        content.put(IPacketConstants.KEY_ACCESS, access);
-
-        // Send the packet
-        sendPacket(content);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.cohorte.remote.IRemoteServiceBroadcaster#sendNotification(org.cohorte
-     * .remote.beans.RemoteServiceEvent)
-     */
-    @Override
-    public void sendNotification(final RemoteServiceEvent aEvent) {
-
-        // Get the registration bean
-        final RemoteServiceRegistration registration = aEvent
-                .getServiceRegistration();
-
-        // The packet content
-        final Map<String, Object> packet = new LinkedHashMap<String, Object>();
-
-        // Indicate our ID
-        packet.put(IPacketConstants.KEY_SENDER, pIsolateUID);
-
-        // Compute the kind of event
-        switch (aEvent.getEventType()) {
-        case REGISTERED:
-            // Service added
-            packet.put(IPacketConstants.KEY_EVENT, IPacketConstants.EVENT_ADD);
-            break;
-
-        case MODIFIED:
-            // Service modified
-            packet.put(IPacketConstants.KEY_EVENT,
-                    IPacketConstants.EVENT_UPDATE);
-
-            // Also add the new service properties
-            packet.put(IPacketConstants.KEY_ENDPOINT_NEW_PROPERTIES,
-                    registration.getServiceProperties());
-            break;
-
-        case UNREGISTERED:
-            // Service removed
-            packet.put(IPacketConstants.KEY_EVENT,
-                    IPacketConstants.EVENT_REMOVE);
-            break;
-        }
-
-        // Set the end point UID
-        packet.put(IPacketConstants.KEY_ENDPOINT_UID,
-                registration.getServiceId());
-
-        // Set the servlet access
-        final Map<String, Object> access = new LinkedHashMap<String, Object>();
-        access.put(IPacketConstants.KEY_ACCESS_PATH, pServletPath);
-        access.put(IPacketConstants.KEY_ACCESS_PORT, pHttpPort);
-        packet.put(IPacketConstants.KEY_ACCESS, access);
-
-        pLogger.log(LogService.LOG_DEBUG, "Sending notification:\n" + packet);
-
-        // Send the packet
-        sendPacket(packet);
+        sendPacket(makeBasicMap(IPacketConstants.EVENT_DISCOVERY));
     }
 
     /**
@@ -802,8 +735,7 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
     @Override
     public String toString() {
 
-        final StringBuilder builder = new StringBuilder(
-                "MulticastBroadcaster({");
+        final StringBuilder builder = new StringBuilder("MulticastDiscovery({");
         // End point
         builder.append(pMulticastGroup).append("}:").append(pMulticastPort);
 
@@ -829,11 +761,11 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
         pServiceController = false;
 
         // Setup the isolate UID
-        pIsolateUID = RSUtils.setupUID(pBundleContext,
+        pFrameworkUID = RSUtils.setupUID(pBundleContext,
                 IRemoteServicesConstants.ISOLATE_UID);
 
         // Set up the servlet
-        pServlet = new RegistryServlet(pIsolateUID, this, pRepository);
+        pServlet = new RegistryServlet(pRegistry, pDispatcher);
         try {
             pHttpService.registerServlet(pServletPath, pServlet, null, null);
 
@@ -876,5 +808,8 @@ public class MulticastBroadcaster implements IRemoteServiceBroadcaster,
 
         // No error: activate the service
         pServiceController = true;
+
+        // Also send a discovery request
+        sendDiscovery();
     }
 }

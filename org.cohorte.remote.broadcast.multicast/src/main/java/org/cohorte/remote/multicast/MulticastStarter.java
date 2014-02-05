@@ -33,7 +33,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
 
 /**
- * Multicast broadcaster component instantiator (w/o Stallone)
+ * Multicast broadcaster component instantiator
  * 
  * @author Thomas Calmant
  */
@@ -94,7 +94,8 @@ public class MulticastStarter {
     @Requires
     private LogService pLogger;
 
-    @Requires(filter = "(factory.name=cohorte-remote-broadcast-multicast)")
+    @Requires(
+            filter = "(factory.name=cohorte-remote-discovery-muticast-factory)")
     private Factory pMulticastFactory;
 
     /**

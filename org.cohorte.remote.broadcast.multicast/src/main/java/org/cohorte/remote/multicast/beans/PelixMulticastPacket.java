@@ -18,6 +18,7 @@ package org.cohorte.remote.multicast.beans;
 import java.util.Map;
 
 import org.cohorte.remote.multicast.IPacketConstants;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,8 +48,11 @@ public class PelixMulticastPacket {
     /** Sender UID */
     private final String pSender;
 
-    /** End point UID */
+    /** Endpoint UID */
     private final String pUID;
+
+    /** Endpoints UIDs */
+    private final String[] pUIDs;
 
     /**
      * Constructs the end point according to the JSON object
@@ -70,6 +74,20 @@ public class PelixMulticastPacket {
 
         // The end point UID is optional (absent of discovery/discovered events)
         pUID = aJsonObject.optString(IPacketConstants.KEY_ENDPOINT_UID);
+
+        // There can be multiple UIDs (add)
+        final JSONArray rawUIDs = aJsonObject
+                .optJSONArray(IPacketConstants.KEY_ENDPOINT_UIDS);
+        if (rawUIDs != null) {
+            pUIDs = new String[rawUIDs.length()];
+            for (int i = 0; i < rawUIDs.length(); i++) {
+                pUIDs[i] = (String) rawUIDs.get(i);
+            }
+
+        } else {
+            // No array of UIDs
+            pUIDs = null;
+        }
 
         // Access
         final JSONObject access = aJsonObject
@@ -136,6 +154,21 @@ public class PelixMulticastPacket {
     public String getUID() {
 
         return pUID;
+    }
+
+    /**
+     * @return the endpoints UIDs
+     */
+    public String[] getUIDs() {
+
+        if (pUIDs == null) {
+            return null;
+        }
+
+        // Return a copy of the array
+        final String[] copy = new String[pUIDs.length];
+        System.arraycopy(pUIDs, 0, copy, 0, pUIDs.length);
+        return copy;
     }
 
     /**
