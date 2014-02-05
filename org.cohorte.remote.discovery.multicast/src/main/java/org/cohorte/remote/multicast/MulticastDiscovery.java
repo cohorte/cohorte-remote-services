@@ -17,17 +17,12 @@ package org.cohorte.remote.multicast;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.SocketException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -37,7 +32,6 @@ import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.ServiceController;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.cohorte.remote.IRemoteServicesConstants;
-import org.cohorte.remote.dispatcher.beans.PelixEndpointDescription;
 import org.cohorte.remote.multicast.beans.PelixMulticastPacket;
 import org.cohorte.remote.multicast.utils.IPacketListener;
 import org.cohorte.remote.multicast.utils.MulticastHandler;
@@ -155,115 +149,6 @@ public class MulticastDiscovery implements IExportEndpointListener,
         sendPacket(makeEndpointMap(IPacketConstants.EVENT_UPDATE, aEndpoint));
     }
 
-    /**
-     * Returns the response of a HTTP server, or throws an exception
-     * 
-     * @param aAddress
-     *            Server address
-     * @param aPort
-     *            Server port
-     * @param aPath
-     *            Request URI
-     * @return The raw response of the server
-     */
-    private String grabData(final InetAddress aAddress, final int aPort,
-            final String aPath) {
-
-        // Forge the URL
-        final URL url;
-        try {
-            url = new URL("http", aAddress.getHostAddress(), aPort, aPath);
-
-        } catch (final MalformedURLException ex) {
-            pLogger.log(LogService.LOG_ERROR,
-                    "Couldn't forge the URL to access: " + aAddress + " : "
-                            + aPort + " - " + aPath, ex);
-            return null;
-        }
-
-        // Open the connection
-        HttpURLConnection httpConnection = null;
-        try {
-            httpConnection = (HttpURLConnection) url.openConnection();
-            httpConnection.connect();
-
-            // Flush the request
-            final int responseCode = httpConnection.getResponseCode();
-            if (responseCode != HttpServletResponse.SC_OK) {
-                // Incorrect answer
-                pLogger.log(LogService.LOG_WARNING, "Error: " + url
-                        + " responded with code " + responseCode);
-                return null;
-            }
-
-            // Get the response content
-            final byte[] rawResult = RSUtils.inputStreamToBytes(httpConnection
-                    .getInputStream());
-
-            // Construct corresponding string
-            return new String(rawResult);
-
-        } catch (final IOException ex) {
-            // Connection error
-            pLogger.log(LogService.LOG_ERROR,
-                    "Error requesting information from " + url.toString(), ex);
-
-        } finally {
-            if (httpConnection != null) {
-                httpConnection.disconnect();
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Retrieves the description of an endpoint from a dispatcher servlet
-     * 
-     * @param aAddress
-     *            Address of the server hosting the servlet
-     * @param aPort
-     *            Port the server is listening to
-     * @param aPath
-     *            Path to the servlet
-     * @param aEndpointUID
-     *            UID of an endpoint
-     * @return The description of the endpoint, or null
-     */
-    private ImportEndpoint grabEndpoint(final InetAddress aAddress,
-            final int aPort, final String aPath, final String aEndpointUID) {
-
-        // Get the raw servlet result
-        final String rawResponse = grabData(aAddress, aPort, aPath
-                + "/endpoint/" + aEndpointUID);
-        if (rawResponse == null || rawResponse.isEmpty()) {
-            // No response
-            pLogger.log(LogService.LOG_WARNING, "No response from the server "
-                    + aAddress + " for end point " + aEndpointUID);
-            return null;
-        }
-
-        try {
-            // Parse it
-            final JSONObject rawEndpoint = new JSONObject(rawResponse);
-
-            // Convert the result
-            final PelixEndpointDescription endpoint = new PelixEndpointDescription(
-                    rawEndpoint);
-            endpoint.setServerAddress(aAddress.getHostAddress());
-            return endpoint.toImportEndpoint();
-
-        } catch (final JSONException ex) {
-            // Invalid response
-            pLogger.log(LogService.LOG_WARNING,
-                    "Invalid response from the server " + aAddress
-                            + " for end point " + aEndpointUID + "\n"
-                            + rawResponse, ex);
-        }
-
-        return null;
-    }
-
     /*
      * (non-Javadoc)
      * 
@@ -301,8 +186,8 @@ public class MulticastDiscovery implements IExportEndpointListener,
 
             for (final String uid : aEndpointPacket.getUIDs()) {
                 // Grab each endpoint
-                final ImportEndpoint endpoint = grabEndpoint(aSenderAddress,
-                        port, path, uid);
+                final ImportEndpoint endpoint = pDispatcherServlet
+                        .grabEndpoint(aSenderAddress, port, path, uid);
                 if (endpoint != null) {
                     pRegistry.add(endpoint);
                 }

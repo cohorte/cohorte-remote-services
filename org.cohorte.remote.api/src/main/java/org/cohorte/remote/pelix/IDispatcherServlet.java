@@ -15,6 +15,7 @@
  */
 package org.cohorte.remote.pelix;
 
+import java.net.InetAddress;
 import java.util.Map;
 
 /**
@@ -49,6 +50,22 @@ public interface IDispatcherServlet {
      * @return A HTTP port
      */
     int getPort();
+
+    /**
+     * Retrieves the description of an endpoint from a dispatcher servlet
+     * 
+     * @param aAddress
+     *            Address of the server hosting the servlet
+     * @param aPort
+     *            Port the server is listening to
+     * @param aPath
+     *            Path to the servlet
+     * @param aEndpointUID
+     *            UID of an endpoint
+     * @return The description of the endpoint, or null
+     */
+    ImportEndpoint grabEndpoint(InetAddress aAddress, int aPort, String aPath,
+            String aEndpointUID);
 
     /**
      * Sends a "discovered" HTTP POST request to the dispatcher servlet of the
