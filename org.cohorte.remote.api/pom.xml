@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.cohorte</groupId>
 		<artifactId>cohorte-remote-services</artifactId>
-		<version>1.1.0-SNAPSHOT</version>
+		<version>1.2.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>org.cohorte.remote.api</artifactId>
@@ -29,11 +29,11 @@
 					<instructions>
 						<Bundle-Name>COHORTE :: Remote Services :: API</Bundle-Name>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Version>${project.version}</Bundle-Version>
 						<Bundle-Vendor>isandlaTech.com</Bundle-Vendor>
 						<Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
 						<Export-Package>
-							org.cohorte.remote;version="1.1.0",
-							org.cohorte.remote.pelix;version="1.1.0"
+							org.cohorte.remote;version=1.2.0
 						</Export-Package>
 					</instructions>
 				</configuration>

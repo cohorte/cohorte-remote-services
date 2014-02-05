@@ -13,28 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cohorte.remote.pelix;
+package org.cohorte.remote;
+
 
 /**
- * Specifies the dispatcher for all exporters
+ * Specifies a service importer
  * 
  * @author Thomas Calmant
  */
-public interface IExportsDispatcher {
+public interface IServiceImporter extends IImportEndpointListener {
 
-    /**
-     * Retrieves the endpoint having the given UID
-     * 
-     * @param aUid
-     *            An endpoint UID
-     * @return The matching endpoint
-     */
-    ExportEndpoint getEndpoint(String aUid);
-
-    /**
-     * Retrieves all of the endpoints known by the dispatcher
-     * 
-     * @return An array of endpoints
-     */
-    ExportEndpoint[] getEndpoints();
 }

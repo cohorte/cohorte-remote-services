@@ -25,10 +25,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.cohorte.remote.ExportEndpoint;
+import org.cohorte.remote.IExportsDispatcher;
+import org.cohorte.remote.IImportsRegistry;
 import org.cohorte.remote.dispatcher.beans.PelixEndpointDescription;
-import org.cohorte.remote.pelix.ExportEndpoint;
-import org.cohorte.remote.pelix.IExportsDispatcher;
-import org.cohorte.remote.pelix.IImportsRegistry;
 import org.cohorte.remote.utilities.RSUtils;
 import org.json.JSONArray;
 import org.json.JSONException;

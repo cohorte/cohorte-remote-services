@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.cohorte.remote.pelix.ImportEndpoint;
+import org.cohorte.remote.ImportEndpoint;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
