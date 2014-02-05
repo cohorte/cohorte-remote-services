@@ -30,7 +30,6 @@ import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
-import org.cohorte.remote.IEndpointHandler;
 import org.cohorte.remote.IRemoteServicesConstants;
 import org.cohorte.remote.pelix.ExportEndpoint;
 import org.cohorte.remote.pelix.IExportEndpointListener;
@@ -121,7 +120,7 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
             // Compute the endpoint name
             final String name = computeEndpointName(
                     (String) svcRef
-                            .getProperty(IEndpointHandler.PROP_ENDPOINT_NAME),
+                            .getProperty(IRemoteServicesConstants.PROP_ENDPOINT_NAME),
                     (Long) svcRef.getProperty(Constants.SERVICE_ID));
 
             try {
@@ -259,7 +258,7 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
         // Compute the endpoint name
         final String name = computeEndpointName(
                 (String) aSvcRef
-                        .getProperty(IEndpointHandler.PROP_ENDPOINT_NAME),
+                        .getProperty(IRemoteServicesConstants.PROP_ENDPOINT_NAME),
                 (Long) aSvcRef.getProperty(Constants.SERVICE_ID));
 
         // Create endpoints
@@ -451,7 +450,7 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
             // Compute its new name
             final String newName = computeEndpointName(
                     (String) aSvcRef
-                            .getProperty(IEndpointHandler.PROP_ENDPOINT_NAME),
+                            .getProperty(IRemoteServicesConstants.PROP_ENDPOINT_NAME),
                     (Long) aSvcRef.getProperty(Constants.SERVICE_ID));
 
             // Update export

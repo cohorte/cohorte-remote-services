@@ -47,6 +47,9 @@ public interface IRemoteServicesConstants {
      */
     String ISOLATE_UID = "cohorte.isolate.uid";
 
+    /** End point service property name */
+    String PROP_ENDPOINT_NAME = "endpoint.name";
+
     /**
      * The UID of the framework that exports the service. This service property
      * is set by the discoverer, when it parses an end point event packet.
