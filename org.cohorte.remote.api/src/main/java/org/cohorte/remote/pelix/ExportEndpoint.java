@@ -185,7 +185,7 @@ public class ExportEndpoint {
      */
     public String[] getConfigurations() {
 
-        return pConfigurations;
+        return Arrays.copyOf(pConfigurations, pConfigurations.length);
     }
 
     /**
@@ -285,6 +285,28 @@ public class ExportEndpoint {
     public void setName(final String aNewName) {
 
         pName = aNewName;
+    }
+
+    /**
+     * Converts this bean into a map, as used by the Pelix dispatcher servlet
+     * 
+     * @return A map describing this endpoint
+     */
+    public Map<String, Object> toMap() {
+
+        final Map<String, Object> result = new LinkedHashMap<String, Object>();
+
+        // Simple attributes
+        result.put("uid", pUid);
+        result.put("sender", pFrameworkUid);
+        result.put("name", pName);
+
+        // Use getters to get valid values
+        result.put("configurations", getConfigurations());
+        result.put("specifications", getExportedSpecs());
+        result.put("properties", getProperties());
+
+        return result;
     }
 
     /*
