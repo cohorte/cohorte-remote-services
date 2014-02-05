@@ -35,9 +35,16 @@
         </dependency>
         <dependency>
             <groupId>org.cohorte</groupId>
+            <artifactId>org.cohorte.remote.dispatcher.servlet</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cohorte</groupId>
             <artifactId>org.cohorte.remote.utilities</artifactId>
             <version>1.1.0-SNAPSHOT</version>
         </dependency>
+        
+        <!-- OSGi -->
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>

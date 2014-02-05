@@ -17,6 +17,7 @@ package org.cohorte.remote.multicast.beans;
 
 import java.util.Map;
 
+import org.cohorte.remote.dispatcher.beans.ParseUtils;
 import org.cohorte.remote.multicast.IPacketConstants;
 import org.json.JSONArray;
 import org.json.JSONException;

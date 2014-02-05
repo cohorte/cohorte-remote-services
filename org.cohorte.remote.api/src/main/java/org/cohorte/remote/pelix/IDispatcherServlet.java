@@ -15,12 +15,26 @@
  */
 package org.cohorte.remote.pelix;
 
+import java.util.Map;
+
 /**
  * Specifies the dispatcher servlet
  * 
  * @author Thomas Calmant
  */
 public interface IDispatcherServlet {
+
+    /**
+     * Replaces in-place export properties by import ones
+     * 
+     * @param aFrameworkUID
+     *            The UID of the framework exporting the service
+     * @param aProperties
+     *            Endpoint properties
+     * @return The filtered properties (same object as second parameter)
+     */
+    Map<String, Object> filterProperties(String aFrameworkUID,
+            Map<String, Object> aProperties);
 
     /**
      * Retrieves the path the servlet is registered to

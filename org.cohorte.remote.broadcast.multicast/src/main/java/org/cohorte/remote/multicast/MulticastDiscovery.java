@@ -16,7 +16,6 @@
 package org.cohorte.remote.multicast;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
@@ -25,14 +24,11 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Property;
@@ -41,22 +37,20 @@ import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.ServiceController;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.cohorte.remote.IRemoteServicesConstants;
-import org.cohorte.remote.multicast.beans.PelixEndpointDescription;
+import org.cohorte.remote.dispatcher.beans.PelixEndpointDescription;
 import org.cohorte.remote.multicast.beans.PelixMulticastPacket;
 import org.cohorte.remote.multicast.utils.IPacketListener;
 import org.cohorte.remote.multicast.utils.MulticastHandler;
 import org.cohorte.remote.pelix.ExportEndpoint;
+import org.cohorte.remote.pelix.IDispatcherServlet;
 import org.cohorte.remote.pelix.IExportEndpointListener;
 import org.cohorte.remote.pelix.IExportsDispatcher;
 import org.cohorte.remote.pelix.IImportsRegistry;
 import org.cohorte.remote.pelix.ImportEndpoint;
 import org.cohorte.remote.utilities.RSUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
 
 /**
@@ -72,12 +66,6 @@ public class MulticastDiscovery implements IExportEndpointListener,
     /** UTF-8 charset name */
     private static final String CHARSET_UTF8 = "UTF-8";
 
-    /** HTTP service port property */
-    private static final String HTTP_SERVICE_PORT = "org.osgi.service.http.port";
-
-    /** HTTPService dependency ID */
-    private static final String IPOJO_ID_HTTP = "http.service";
-
     /** The bundle context */
     private final BundleContext pBundleContext;
 
@@ -85,15 +73,12 @@ public class MulticastDiscovery implements IExportEndpointListener,
     @Requires
     private IExportsDispatcher pDispatcher;
 
+    /** The dispatcher servlet */
+    @Requires
+    private IDispatcherServlet pDispatcherServlet;
+
     /** Framework UID */
     private String pFrameworkUID;
-
-    /** The HTTP server port */
-    private int pHttpPort;
-
-    /** The HTTP service */
-    @Requires(id = IPOJO_ID_HTTP, filter = "(" + HTTP_SERVICE_PORT + "=*)")
-    private HttpService pHttpService;
 
     /** Log service */
     @Requires
@@ -119,13 +104,6 @@ public class MulticastDiscovery implements IExportEndpointListener,
     @ServiceController
     private boolean pServiceController;
 
-    /** The registry servlet */
-    private RegistryServlet pServlet;
-
-    /** The servlet registration path */
-    @Property(name = "servlet.path", value = "/pelix-dispatcher")
-    private String pServletPath;
-
     /**
      * Sets up members
      * 
@@ -135,36 +113,6 @@ public class MulticastDiscovery implements IExportEndpointListener,
     public MulticastDiscovery(final BundleContext aBundleContext) {
 
         pBundleContext = aBundleContext;
-    }
-
-    /**
-     * HTTP service ready
-     * 
-     * @param aHttpService
-     *            The bound service
-     * @param aServiceProperties
-     *            The HTTP service properties
-     */
-    @Bind(id = IPOJO_ID_HTTP)
-    private void bindHttpService(final HttpService aHttpService,
-            final Map<?, ?> aServiceProperties) {
-
-        final Object rawPort = aServiceProperties.get(HTTP_SERVICE_PORT);
-
-        if (rawPort instanceof Number) {
-            // Get the integer
-            pHttpPort = ((Number) rawPort).intValue();
-
-        } else if (rawPort instanceof CharSequence) {
-            // Parse the string
-            pHttpPort = Integer.parseInt(rawPort.toString());
-
-        } else {
-            // Unknown port type
-            pLogger.log(LogService.LOG_WARNING, "Couldn't read access port "
-                    + rawPort);
-            pHttpPort = -1;
-        }
     }
 
     /*
@@ -205,40 +153,6 @@ public class MulticastDiscovery implements IExportEndpointListener,
             final Map<String, Object> aOldProperties) {
 
         sendPacket(makeEndpointMap(IPacketConstants.EVENT_UPDATE, aEndpoint));
-    }
-
-    /**
-     * Replaces in-place export properties by import ones
-     * 
-     * @param aFrameworkUID
-     *            The UID of the framework exporting the service
-     * @param aProperties
-     *            Endpoint properties
-     * @return The filtered properties (same object as second parameter)
-     */
-    private Map<String, Object> filterProperties(final String aFrameworkUID,
-            final Map<String, Object> aProperties) {
-
-        // Add the "imported" property
-        aProperties.put(Constants.SERVICE_IMPORTED, true);
-
-        // Replace the "exported configs"
-        final Object configs = aProperties
-                .remove(Constants.SERVICE_EXPORTED_CONFIGS);
-        if (configs != null) {
-            aProperties.put(Constants.SERVICE_IMPORTED_CONFIGS, configs);
-        }
-
-        // Clear other export properties
-        aProperties.remove(Constants.SERVICE_EXPORTED_INTENTS);
-        aProperties.remove(Constants.SERVICE_EXPORTED_INTENTS_EXTRA);
-        aProperties.remove(Constants.SERVICE_EXPORTED_INTERFACES);
-
-        // Add the framework UID
-        aProperties.put(IRemoteServicesConstants.PROP_FRAMEWORK_UID,
-                aFrameworkUID);
-
-        return aProperties;
     }
 
     /**
@@ -403,7 +317,7 @@ public class MulticastDiscovery implements IExportEndpointListener,
             final String frameworkUid = aEndpointPacket.getSender();
             final Map<String, Object> newProperties = aEndpointPacket
                     .getNewProperties();
-            filterProperties(frameworkUid, newProperties);
+            pDispatcherServlet.filterProperties(frameworkUid, newProperties);
             pRegistry.update(aEndpointPacket.getUID(), newProperties);
 
         } else {
@@ -463,8 +377,8 @@ public class MulticastDiscovery implements IExportEndpointListener,
         // Dispatch...
         if (IPacketConstants.EVENT_DISCOVERY.equals(event)) {
             // Discovery request: send a packet back
-            sendDiscovered(senderAddress.getHostAddress(), senderPort,
-                    endpointPacket.getAccessPath());
+            pDispatcherServlet.sendDiscovered(senderAddress.getHostAddress(),
+                    senderPort, endpointPacket.getAccessPath());
 
         } else {
             // Handle an end point event
@@ -491,11 +405,6 @@ public class MulticastDiscovery implements IExportEndpointListener,
             pMulticast = null;
         }
 
-        if (pServlet != null) {
-            pHttpService.unregister(pServletPath);
-            pServlet = null;
-        }
-
         pLogger.log(LogService.LOG_INFO, "Multicast broadcaster gone");
     }
 
@@ -515,8 +424,10 @@ public class MulticastDiscovery implements IExportEndpointListener,
 
         // Set the servlet access
         final Map<String, Object> access = new LinkedHashMap<String, Object>();
-        access.put(IPacketConstants.KEY_ACCESS_PATH, pServletPath);
-        access.put(IPacketConstants.KEY_ACCESS_PORT, pHttpPort);
+        access.put(IPacketConstants.KEY_ACCESS_PATH,
+                pDispatcherServlet.getPath());
+        access.put(IPacketConstants.KEY_ACCESS_PORT,
+                pDispatcherServlet.getPort());
         result.put(IPacketConstants.KEY_ACCESS, access);
 
         return result;
@@ -572,100 +483,6 @@ public class MulticastDiscovery implements IExportEndpointListener,
 
         packet.put(IPacketConstants.KEY_ENDPOINT_UIDS, uids);
         return packet;
-    }
-
-    /**
-     * Sends a "discovered" JHTTP POST request to the dispatcher servlet of the
-     * framework that has been discovered
-     * 
-     * @param aHost
-     *            Address of the discovered framework
-     * @param aPort
-     *            Port of the HTTP server of the sender
-     * @param aPath
-     *            Path to the dispatcher servlet
-     */
-    public void sendDiscovered(final String aHost, final int aPort,
-            final String aPath) {
-
-        // Prepare our endpoints
-        final Collection<Map<String, Object>> endpointsMaps = new LinkedList<>();
-        for (final ExportEndpoint endpoint : pDispatcher.getEndpoints()) {
-            endpointsMaps.add(endpoint.toMap());
-        }
-
-        // Convert the list to JSON
-        final String data = new JSONArray(endpointsMaps).toString();
-
-        // Prepare the path to the servlet endpoints
-        final StringBuilder servletPath = new StringBuilder(aPath);
-        if (!aPath.endsWith("/")) {
-            servletPath.append("/");
-        }
-        servletPath.append("endpoints");
-
-        final URL url;
-        try {
-            url = new URL("http", aHost, aPort, aPath);
-
-        } catch (final MalformedURLException ex) {
-            pLogger.log(LogService.LOG_ERROR,
-                    "Error forging URL to send a discovered packet: " + ex, ex);
-            return;
-        }
-
-        // Send a POST request
-        HttpURLConnection httpConnection = null;
-        try {
-            httpConnection = (HttpURLConnection) url.openConnection();
-
-            // POST message
-            httpConnection.setRequestMethod("POST");
-            httpConnection.setUseCaches(false);
-            httpConnection.setDoInput(true);
-            httpConnection.setDoOutput(true);
-
-            // Headers
-            httpConnection.setRequestProperty("Content-Type",
-                    "application/json");
-
-            // After fields, before content
-            httpConnection.connect();
-
-            // Write the event in the request body, if any
-            final OutputStream outStream = httpConnection.getOutputStream();
-
-            try {
-                outStream.write(data.getBytes());
-                outStream.flush();
-
-            } finally {
-                // Always be nice...
-                outStream.close();
-            }
-
-            // Flush the request
-            final int responseCode = httpConnection.getResponseCode();
-            final String responseData = new String(
-                    RSUtils.inputStreamToBytes(httpConnection.getInputStream()));
-
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                pLogger.log(LogService.LOG_WARNING,
-                        "Error sending a 'discovered' packet: " + responseCode
-                                + " - " + responseData);
-                return;
-            }
-
-        } catch (final IOException ex) {
-            pLogger.log(LogService.LOG_ERROR,
-                    "Error sending the 'discovered' packet: " + ex, ex);
-
-        } finally {
-            // Clean up
-            if (httpConnection != null) {
-                httpConnection.disconnect();
-            }
-        }
     }
 
     /**
@@ -763,18 +580,6 @@ public class MulticastDiscovery implements IExportEndpointListener,
         // Setup the isolate UID
         pFrameworkUID = RSUtils.setupUID(pBundleContext,
                 IRemoteServicesConstants.ISOLATE_UID);
-
-        // Set up the servlet
-        pServlet = new RegistryServlet(pRegistry, pDispatcher);
-        try {
-            pHttpService.registerServlet(pServletPath, pServlet, null, null);
-
-        } catch (final Exception ex) {
-            pLogger.log(LogService.LOG_ERROR,
-                    "Error registering the dispatcher servlet. Abandon.", ex);
-            invalidate();
-            return;
-        }
 
         // Compute the group address
         InetAddress groupAddress;
