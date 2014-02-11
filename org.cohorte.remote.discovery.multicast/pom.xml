@@ -88,6 +88,7 @@
                         <Import-Package>
                             org.cohorte.remote;version=1.2.0,
                             org.cohorte.remote.utilities;version=1.0.0,
+                            org.cohorte.remote.dispatcher.beans;version=1.0.0,
                             org.json,
                             org.osgi.framework;version=1.7.0,
                             org.osgi.service.log;version=1.3
