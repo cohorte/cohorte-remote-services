@@ -15,8 +15,6 @@
  */
 package org.cohorte.remote.jsonrpc;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -189,15 +187,9 @@ public class JabsorbRpcExporter implements IServiceExporter {
      */
     private String getAccesses() {
 
-        try {
-            return new URI("http", null, "{server}", pHttpPort, pServletName,
-                    null, null).toString();
-
-        } catch (final URISyntaxException ex) {
-            pLogger.log(LogService.LOG_ERROR, "Error creating the access URL: "
-                    + ex, ex);
-            return "";
-        }
+        // Forge the URI manually, as '{' and '}' are forbidden in URIs
+        // (that's why we use it)
+        return "http://{server}:" + pHttpPort + "/" + pServletName;
     }
 
     /*
