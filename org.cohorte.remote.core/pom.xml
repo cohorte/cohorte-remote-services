@@ -53,7 +53,8 @@
 						<Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
 						<Import-Package>
 							org.osgi.framework,
-							org.cohorte.remote;version="1.2.0"
+							org.cohorte.remote;version="1.2.0",
+							org.cohorte.remote.utilities;version="1.0.0"
 						</Import-Package>
 					</instructions>
 				</configuration>
