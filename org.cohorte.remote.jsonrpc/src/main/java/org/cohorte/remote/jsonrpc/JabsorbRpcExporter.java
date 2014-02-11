@@ -174,6 +174,9 @@ public class JabsorbRpcExporter implements IServiceExporter {
                 .toString(), pFrameworkUid, pConfigurations, name, aReference,
                 service, extraProps);
 
+        // Register the object in the Jabsorb bridge
+        pJsonRpcBridge.registerObject(name, service);
+
         // Store information
         pEndpoints.put(name, endpoint);
         return endpoint;
