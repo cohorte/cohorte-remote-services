@@ -27,7 +27,7 @@ import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Property;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
-import org.cohorte.remote.IServiceImporter;
+import org.cohorte.remote.IImportEndpointListener;
 import org.cohorte.remote.ImportEndpoint;
 import org.cohorte.remote.utilities.BundleClass;
 import org.cohorte.remote.utilities.BundlesClassLoader;
@@ -45,9 +45,9 @@ import org.osgi.service.log.LogService;
  * @author Thomas Calmant
  */
 @Component(name = "cohorte-remote-importer-jabsorb-factory")
-@Provides(specifications = IServiceImporter.class)
+@Provides(specifications = IImportEndpointListener.class)
 @Instantiate(name = "cohorte-remote-importer-jabsorb")
-public class JabsorbRpcImporter implements IServiceImporter {
+public class JabsorbRpcImporter implements IImportEndpointListener {
 
     /** Supported export configurations */
     @Property(name = Constants.REMOTE_CONFIGS_SUPPORTED,
