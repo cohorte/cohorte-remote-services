@@ -150,7 +150,7 @@ public class ExportEndpoint {
             final Collection<String> exportedSpecs = (Collection<String>) rawExportedSpecs;
             for (final String exportedSpec : exportedSpecs) {
                 if (specs.contains(exportedSpec)) {
-                    exportedSpecs.add(exportedSpec);
+                    filteredSpecs.add(exportedSpec);
                 }
             }
         }
