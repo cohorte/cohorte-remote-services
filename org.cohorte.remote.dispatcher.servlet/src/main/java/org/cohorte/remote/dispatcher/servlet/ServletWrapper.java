@@ -329,7 +329,7 @@ public class ServletWrapper implements IDispatcherServlet {
 
         final URL url;
         try {
-            url = new URL("http", aHost, aPort, aPath);
+            url = new URL("http", aHost, aPort, servletPath.toString());
 
         } catch (final MalformedURLException ex) {
             pLogger.log(LogService.LOG_ERROR,
