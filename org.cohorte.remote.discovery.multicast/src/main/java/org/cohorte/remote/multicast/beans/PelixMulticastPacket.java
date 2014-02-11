@@ -15,6 +15,7 @@
  */
 package org.cohorte.remote.multicast.beans;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.cohorte.remote.dispatcher.beans.ParseUtils;
@@ -167,9 +168,7 @@ public class PelixMulticastPacket {
         }
 
         // Return a copy of the array
-        final String[] copy = new String[pUIDs.length];
-        System.arraycopy(pUIDs, 0, copy, 0, pUIDs.length);
-        return copy;
+        return Arrays.copyOf(pUIDs, pUIDs.length);
     }
 
     /**
