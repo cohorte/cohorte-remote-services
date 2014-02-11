@@ -112,8 +112,12 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
 
         if (!pValidated) {
             // Not yet validated
+            pLogger.log(LogService.LOG_WARNING, "Not yet validated for "
+                    + aExporter);
             return;
         }
+
+        pLogger.log(LogService.LOG_WARNING, "Binding exporter: " + aExporter);
 
         // Tell the exporter to export already known services
         for (final ServiceReference<?> svcRef : pServiceUids.keySet()) {
@@ -129,6 +133,8 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
                         name, pFrameworkUid);
                 if (endpoint == null) {
                     // Export refused
+                    pLogger.log(LogService.LOG_ERROR, "... Binding refused - "
+                            + svcRef);
                     continue;
                 }
 
@@ -137,6 +143,9 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
                 pEndpoints.put(uid, endpoint);
                 pUidExporter.put(uid, aExporter);
                 pServiceUids.get(svcRef).add(uid);
+
+                pLogger.log(LogService.LOG_WARNING, "... New endpoint for "
+                        + svcRef + " - " + uid);
 
                 // Call listeners
                 for (final IExportEndpointListener listener : pListeners) {
@@ -225,9 +234,14 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
      */
     private synchronized void exportService(final ServiceReference<?> aSvcRef) {
 
+        // Create a container for UIDs and store the ServiceReference
+        // -> this is how we now which service to export in bindExporter()
+        final Collection<String> serviceUids = getServiceUids(aSvcRef);
+
         // Check exporters
         if (pExporters.isEmpty()) {
-            pLogger.log(LogService.LOG_WARNING, "No exporters yet");
+            pLogger.log(LogService.LOG_WARNING, "No exporters yet for "
+                    + aSvcRef);
             return;
         }
 
@@ -263,7 +277,6 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
 
         // Create endpoints
         final Collection<ExportEndpoint> endpoints = new LinkedList<ExportEndpoint>();
-        final Collection<String> serviceUids = getServiceUids(aSvcRef);
 
         for (final IServiceExporter exporter : exporters) {
             try {
@@ -499,6 +512,7 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
 
         try {
             // Export existing services
+            pLogger.log(LogService.LOG_WARNING, "First export loop");
             final ServiceReference<?>[] svcRefs = pBundleContext
                     .getServiceReferences((String) null, filter);
             if (svcRefs != null) {
@@ -508,6 +522,7 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
             }
 
             // Register a service listener
+            pLogger.log(LogService.LOG_WARNING, "Register to service events");
             pBundleContext.addServiceListener(this, filter);
 
         } catch (final InvalidSyntaxException ex) {
