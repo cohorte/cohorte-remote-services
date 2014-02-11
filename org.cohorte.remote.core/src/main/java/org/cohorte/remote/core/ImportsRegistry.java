@@ -31,7 +31,6 @@ import org.apache.felix.ipojo.annotations.Validate;
 import org.cohorte.remote.IImportEndpointListener;
 import org.cohorte.remote.IImportsRegistry;
 import org.cohorte.remote.IRemoteServicesConstants;
-import org.cohorte.remote.IServiceImporter;
 import org.cohorte.remote.ImportEndpoint;
 import org.cohorte.remote.utilities.RSUtils;
 import org.osgi.framework.BundleContext;
@@ -48,9 +47,6 @@ import org.osgi.service.log.LogService;
 public class ImportsRegistry implements IImportsRegistry {
 
     /** iPOJO dependency ID */
-    private static final String ID_IMPORTERS = "importers";
-
-    /** iPOJO dependency ID */
     private static final String ID_LISTENERS = "listeners";
 
     /** Bundle context */
@@ -61,10 +57,6 @@ public class ImportsRegistry implements IImportsRegistry {
 
     /** Framework UID */
     private String pFrameworkUid;
-
-    /** Service Importers */
-    @Requires(id = ID_IMPORTERS, optional = true)
-    private List<IServiceImporter> pImporters;
 
     /** Endpoints listeners */
     @Requires(id = ID_LISTENERS, optional = true)
