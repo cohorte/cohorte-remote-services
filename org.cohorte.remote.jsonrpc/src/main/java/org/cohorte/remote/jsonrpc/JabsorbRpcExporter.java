@@ -28,8 +28,10 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.cohorte.remote.ExportEndpoint;
+import org.cohorte.remote.IRemoteServicesConstants;
 import org.cohorte.remote.IServiceExporter;
 import org.cohorte.remote.utilities.BundlesClassLoader;
+import org.cohorte.remote.utilities.RSUtils;
 import org.jabsorb.ng.JSONRPCBridge;
 import org.jabsorb.ng.JSONRPCServlet;
 import org.jabsorb.ng.client.HTTPSessionFactory;
@@ -229,8 +231,9 @@ public class JabsorbRpcExporter implements IServiceExporter {
     @Invalidate
     public void invalidate() {
 
-        // Clean up the bridge
+        // Clean up
         stopJabsorbBridge();
+        pFrameworkUid = null;
 
         pLogger.log(LogService.LOG_INFO, "JABSORB-RPC exporter gone");
     }
@@ -345,6 +348,10 @@ public class JabsorbRpcExporter implements IServiceExporter {
      */
     @Validate
     public void validate() {
+
+        // Setup the isolate UID
+        pFrameworkUid = RSUtils.setupUID(pContext,
+                IRemoteServicesConstants.ISOLATE_UID);
 
         // Start the bridge
         startJabsorbBridge();
