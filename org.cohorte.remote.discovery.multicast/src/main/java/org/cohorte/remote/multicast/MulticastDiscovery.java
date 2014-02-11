@@ -254,7 +254,6 @@ public class MulticastDiscovery implements IExportEndpointListener,
 
         // Get information about the sender
         final InetAddress senderAddress = aSender.getAddress();
-        final int senderPort = aSender.getPort();
 
         // Get the kind of event
         final String event = endpointPacket.getEvent();
@@ -263,7 +262,8 @@ public class MulticastDiscovery implements IExportEndpointListener,
         if (IPacketConstants.EVENT_DISCOVERY.equals(event)) {
             // Discovery request: send a packet back
             pDispatcherServlet.sendDiscovered(senderAddress.getHostAddress(),
-                    senderPort, endpointPacket.getAccessPath());
+                    endpointPacket.getAccessPort(),
+                    endpointPacket.getAccessPath());
 
         } else {
             // Handle an end point event
