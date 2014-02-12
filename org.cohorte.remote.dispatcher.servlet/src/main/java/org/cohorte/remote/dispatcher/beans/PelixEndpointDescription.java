@@ -183,4 +183,16 @@ public class PelixEndpointDescription {
         endpoint.setServer(pServerAddress);
         return endpoint;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+
+        return "PelixEndpointDescription(uid=" + pUID + ", fwUid=" + pSender
+                + ", name=" + pName + ", server=" + pServerAddress + ")";
+    }
 }
