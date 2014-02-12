@@ -12,9 +12,9 @@
         <module>org.cohorte.remote.api</module>
         <module>org.cohorte.remote.utilities</module>
         <module>org.cohorte.remote.core</module>
-	<module>org.cohorte.remote.dispatcher.servlet</module>
+        <module>org.cohorte.remote.dispatcher.servlet</module>
         <module>org.cohorte.remote.discovery.multicast</module>
-        <module>org.cohorte.remote.jsonrpc</module>
+        <module>org.cohorte.remote.jabsorbrpc</module>
     </modules>
 
     <properties>

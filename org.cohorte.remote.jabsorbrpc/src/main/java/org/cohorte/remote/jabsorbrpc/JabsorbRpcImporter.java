@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cohorte.remote.jsonrpc;
+package org.cohorte.remote.jabsorbrpc;
 
 import java.util.Arrays;
 import java.util.Hashtable;
