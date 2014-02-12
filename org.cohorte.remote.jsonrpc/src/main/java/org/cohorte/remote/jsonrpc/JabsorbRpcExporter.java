@@ -174,7 +174,7 @@ public class JabsorbRpcExporter implements IServiceExporter {
         // Prepare the endpoint bean
         final ExportEndpoint endpoint = new ExportEndpoint(UUID.randomUUID()
                 .toString(), pFrameworkUid, pConfigurations, name, aReference,
-                service, extraProps);
+                extraProps);
 
         // Register the object in the Jabsorb bridge
         pJsonRpcBridge.registerObject(name, service);

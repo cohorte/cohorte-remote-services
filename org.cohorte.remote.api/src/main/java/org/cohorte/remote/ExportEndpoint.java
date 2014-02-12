@@ -42,9 +42,6 @@ public class ExportEndpoint {
     /** Host framework UID */
     private final String pFrameworkUid;
 
-    /** The exported service */
-    private final Object pInstance;
-
     /** Endpoint name */
     private String pName;
 
@@ -70,8 +67,6 @@ public class ExportEndpoint {
      *            Name of the endpoint
      * @param aServiceReference
      *            {@link ServiceReference} of the exported service
-     * @param aService
-     *            The exported service
      * @param aProperties
      *            Extra properties
      * @throws IllegalArgumentException
@@ -79,7 +74,7 @@ public class ExportEndpoint {
      */
     public ExportEndpoint(final String aUid, final String aFrameworkUid,
             final String[] aConfigurations, final String aName,
-            final ServiceReference<?> aServiceReference, final Object aService,
+            final ServiceReference<?> aServiceReference,
             final Map<String, Object> aProperties) {
 
         if (aUid == null || aUid.isEmpty()) {
@@ -91,7 +86,6 @@ public class ExportEndpoint {
         pFrameworkUid = aFrameworkUid;
         pName = aName;
         pReference = aServiceReference;
-        pInstance = aService;
 
         // Copy configurations in a new array
         pConfigurations = Arrays
@@ -205,16 +199,6 @@ public class ExportEndpoint {
     }
 
     /**
-     * Returns the exported service
-     * 
-     * @return the exported service
-     */
-    Object getInstance() {
-
-        return pInstance;
-    }
-
-    /**
      * @return the name
      */
     public String getName() {
@@ -277,6 +261,39 @@ public class ExportEndpoint {
     }
 
     /**
+     * Returns the properties of this endpoint where export properties have been
+     * replaced by import ones
+     * 
+     * @return A dictionary with import properties
+     */
+    public Map<String, Object> makeImportProperties() {
+
+        // Get the merged properties
+        final Map<String, Object> importProperties = getProperties();
+
+        // Add the "imported" property
+        importProperties.put(Constants.SERVICE_IMPORTED, true);
+
+        // Replace the "exported configs"
+        final Object configs = importProperties
+                .remove(Constants.SERVICE_EXPORTED_CONFIGS);
+        if (configs != null) {
+            importProperties.put(Constants.SERVICE_IMPORTED_CONFIGS, configs);
+        }
+
+        // Clear other export properties
+        importProperties.remove(Constants.SERVICE_EXPORTED_INTENTS);
+        importProperties.remove(Constants.SERVICE_EXPORTED_INTENTS_EXTRA);
+        importProperties.remove(Constants.SERVICE_EXPORTED_INTERFACES);
+
+        // Add the framework UID
+        importProperties.put(IRemoteServicesConstants.PROP_FRAMEWORK_UID,
+                pFrameworkUid);
+
+        return importProperties;
+    }
+
+    /**
      * Sets the new name of the endpoint
      * 
      * @param aNewName
@@ -304,7 +321,7 @@ public class ExportEndpoint {
         // Use getters to get valid values
         result.put("configurations", getConfigurations());
         result.put("specifications", getExportedSpecs());
-        result.put("properties", getProperties());
+        result.put("properties", makeImportProperties());
 
         return result;
     }
