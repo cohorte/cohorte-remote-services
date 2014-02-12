@@ -40,14 +40,12 @@ import org.cohorte.remote.ExportEndpoint;
 import org.cohorte.remote.IDispatcherServlet;
 import org.cohorte.remote.IExportsDispatcher;
 import org.cohorte.remote.IImportsRegistry;
-import org.cohorte.remote.IRemoteServicesConstants;
 import org.cohorte.remote.ImportEndpoint;
 import org.cohorte.remote.dispatcher.beans.PelixEndpointDescription;
 import org.cohorte.remote.utilities.RSUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.osgi.framework.Constants;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.log.LogService;
 
@@ -125,39 +123,6 @@ public class ServletWrapper implements IDispatcherServlet {
                     + rawPort);
             pHttpPort = -1;
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.cohorte.remote.pelix.IDispatcherServlet#filterProperties(java.lang
-     * .String, java.util.Map)
-     */
-    @Override
-    public Map<String, Object> filterProperties(final String aFrameworkUID,
-            final Map<String, Object> aProperties) {
-
-        // Add the "imported" property
-        aProperties.put(Constants.SERVICE_IMPORTED, true);
-
-        // Replace the "exported configs"
-        final Object configs = aProperties
-                .remove(Constants.SERVICE_EXPORTED_CONFIGS);
-        if (configs != null) {
-            aProperties.put(Constants.SERVICE_IMPORTED_CONFIGS, configs);
-        }
-
-        // Clear other export properties
-        aProperties.remove(Constants.SERVICE_EXPORTED_INTENTS);
-        aProperties.remove(Constants.SERVICE_EXPORTED_INTENTS_EXTRA);
-        aProperties.remove(Constants.SERVICE_EXPORTED_INTERFACES);
-
-        // Add the framework UID
-        aProperties.put(IRemoteServicesConstants.PROP_FRAMEWORK_UID,
-                aFrameworkUID);
-
-        return aProperties;
     }
 
     /*

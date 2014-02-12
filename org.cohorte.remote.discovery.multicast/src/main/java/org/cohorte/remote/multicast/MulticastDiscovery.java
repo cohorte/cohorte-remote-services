@@ -199,10 +199,8 @@ public class MulticastDiscovery implements IExportEndpointListener,
 
         } else if (IPacketConstants.EVENT_UPDATE.equals(event)) {
             // Endpoint updated
-            final String frameworkUid = aEndpointPacket.getSender();
             final Map<String, Object> newProperties = aEndpointPacket
                     .getNewProperties();
-            pDispatcherServlet.filterProperties(frameworkUid, newProperties);
             pRegistry.update(aEndpointPacket.getUID(), newProperties);
 
         } else {
@@ -336,10 +334,10 @@ public class MulticastDiscovery implements IExportEndpointListener,
         // Add endpoint information
         packet.put(IPacketConstants.KEY_ENDPOINT_UID, aEndpoint.getUid());
 
-        // Update
+        // Update, using filtered properties
         if (IPacketConstants.EVENT_UPDATE.equals(aEvent)) {
             packet.put(IPacketConstants.KEY_ENDPOINT_NEW_PROPERTIES,
-                    aEndpoint.getProperties());
+                    aEndpoint.makeImportProperties());
         }
 
         return packet;
