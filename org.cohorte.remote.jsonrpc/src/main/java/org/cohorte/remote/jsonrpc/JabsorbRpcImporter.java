@@ -51,7 +51,7 @@ public class JabsorbRpcImporter implements IImportEndpointListener {
 
     /** Supported export configurations */
     @Property(name = Constants.REMOTE_CONFIGS_SUPPORTED,
-            value = "{jabsorb-rpc}")
+            value = "{jabsorbrpc,jabsorb-rpc}")
     private String[] pConfigurations;
 
     /** The bundle context */
@@ -146,9 +146,10 @@ public class JabsorbRpcImporter implements IImportEndpointListener {
         }
 
         // FIXME: Get the first URL in the list
-        final String accessUrl = rawAccessUrl.split(",")[0];
-        if (aEndpoint.getServer() != null) {
-            accessUrl.replace("{server}", aEndpoint.getServer());
+        String accessUrl = rawAccessUrl.split(",")[0];
+        final String server = aEndpoint.getServer();
+        if (server != null && !server.isEmpty()) {
+            accessUrl = accessUrl.replace("{server}", server);
         }
 
         pLogger.log(LogService.LOG_DEBUG, "Chosen access: " + accessUrl);

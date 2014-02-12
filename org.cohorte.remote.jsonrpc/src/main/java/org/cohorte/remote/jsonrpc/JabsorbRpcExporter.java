@@ -194,7 +194,20 @@ public class JabsorbRpcExporter implements IServiceExporter {
 
         // Forge the URI manually, as '{' and '}' are forbidden in URIs
         // (that's why we use it)
-        return "http://{server}:" + pHttpPort + "/" + pServletName;
+        final StringBuilder builder = new StringBuilder("http://{server}");
+
+        if (pHttpPort > 0) {
+            // Port given
+            builder.append(":").append(pHttpPort);
+        }
+
+        if (!pServletName.startsWith("/")) {
+            // Add path starting slash if necessary
+            builder.append("/");
+        }
+
+        builder.append(pServletName);
+        return builder.toString();
     }
 
     /*
