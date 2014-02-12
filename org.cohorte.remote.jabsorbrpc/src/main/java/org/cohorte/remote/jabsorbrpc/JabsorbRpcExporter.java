@@ -59,7 +59,8 @@ public class JabsorbRpcExporter implements IServiceExporter {
     private static final String IPOJO_ID_HTTP = "http.service";
 
     /** Supported export configurations */
-    @Property(name = Constants.REMOTE_CONFIGS_SUPPORTED, value = "{jabsorbrpc}")
+    @Property(name = Constants.REMOTE_CONFIGS_SUPPORTED,
+            value = "{jabsorbrpc,jabsorb-rpc}")
     private String[] pConfigurations;
 
     /** The bundle context */
