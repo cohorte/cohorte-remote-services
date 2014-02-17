@@ -96,6 +96,13 @@ public class ImportsRegistry implements IImportsRegistry {
         final String uid = aEndpoint.getUid();
         final String fwUid = aEndpoint.getFrameworkUid();
 
+        // Check if the endpoint has specifications: this is not the case if
+        // the service has no Java specification interface
+        if (aEndpoint.getSpecifications().length == 0) {
+            // Ignore it
+            return false;
+        }
+
         if (pFrameworkUid.equals(fwUid)) {
             // Avoid to import our own services
             pLogger.log(LogService.LOG_DEBUG,
