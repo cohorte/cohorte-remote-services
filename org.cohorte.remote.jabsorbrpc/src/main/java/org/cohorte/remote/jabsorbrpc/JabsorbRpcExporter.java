@@ -344,8 +344,9 @@ public class JabsorbRpcExporter implements IServiceExporter {
     public synchronized void updateExport(final ExportEndpoint aEndpoint,
             final String aNewName, final Map<String, Object> aOldProperties) {
 
-        if (pEndpoints.containsKey(aNewName)) {
-            // Reject the new name
+        final ExportEndpoint knownEndpoint = pEndpoints.get(aNewName);
+        if (knownEndpoint != null && !knownEndpoint.equals(aEndpoint)) {
+            // Name already taken by another endpoint: reject it
             throw new IllegalArgumentException("New name of " + aEndpoint
                     + " is already in use: " + aNewName);
         }

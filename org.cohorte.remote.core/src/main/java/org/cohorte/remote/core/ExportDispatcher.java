@@ -401,11 +401,13 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
                 // New match
                 exportService(svcRef);
             }
+            break;
 
         case ServiceEvent.MODIFIED_ENDMATCH:
         case ServiceEvent.UNREGISTERING:
             // Service must not be exported
             unexportService(svcRef);
+            break;
 
         default:
             break;
@@ -481,7 +483,7 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
             } catch (final IllegalArgumentException ex) {
                 // New name refused
                 pLogger.log(LogService.LOG_ERROR,
-                        "Error updating service properties: " + ex, ex);
+                        "Rejected update of service properties: " + ex);
 
                 // Remove this endpoint
                 exporter.unexportService(endpoint);
