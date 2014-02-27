@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.cohorte</groupId>
 		<artifactId>cohorte-remote-services</artifactId>
-		<version>1.1.0-SNAPSHOT</version>
+		<version>1.2.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>org.cohorte.ecf.provider.jabsorb</artifactId>
@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>org.cohorte</groupId>
 			<artifactId>org.cohorte.remote.utilities</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
+			<version>${project.parent.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
