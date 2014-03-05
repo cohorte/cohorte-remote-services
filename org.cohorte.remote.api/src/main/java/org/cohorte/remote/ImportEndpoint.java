@@ -184,7 +184,13 @@ public class ImportEndpoint {
      */
     public void setServer(final String aServer) {
 
-        pServer = aServer;
+        if (aServer.contains(":") && !aServer.startsWith("[")) {
+            // IPv6 without square brackets: protect it
+            pServer = "[" + aServer + "]";
+        } else {
+            // Direct copy
+            pServer = aServer;
+        }
     }
 
     /*
