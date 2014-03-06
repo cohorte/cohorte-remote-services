@@ -15,8 +15,6 @@
  */
 package org.cohorte.remote.utilities;
 
-import javax.swing.text.Utilities;
-
 import org.osgi.framework.BundleContext;
 
 /**
@@ -52,7 +50,6 @@ public class BundlesClassLoader extends ClassLoader {
      * @throws ClassNotFoundException
      *             The class could not be found
      * 
-     * @see Utilities#findClassInBundles(org.osgi.framework.Bundle[], String)
      * @see java.lang.ClassLoader#loadClass(java.lang.String)
      */
     @Override
