@@ -27,7 +27,7 @@ import org.osgi.framework.BundleContext;
  * 
  * @author Thomas Calmant
  */
-public class RSUtils {
+public final class RSUtils {
 
     /**
      * Converts an input stream into a byte array

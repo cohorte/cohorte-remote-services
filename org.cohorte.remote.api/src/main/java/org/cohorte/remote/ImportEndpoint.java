@@ -75,7 +75,9 @@ public class ImportEndpoint {
         pConfigurations = Arrays
                 .copyOf(aConfigurations, aConfigurations.length);
         pSpecifications = EndpointUtils.extractSpecifications(aSpecifications);
-        setProperties(aProperties);
+        if (aProperties != null) {
+            pProperties.putAll(aProperties);
+        }
     }
 
     /*

@@ -34,7 +34,6 @@ import org.apache.felix.ipojo.annotations.Validate;
 import org.cohorte.remote.ExportEndpoint;
 import org.cohorte.remote.IDispatcherServlet;
 import org.cohorte.remote.IExportEndpointListener;
-import org.cohorte.remote.IExportsDispatcher;
 import org.cohorte.remote.IImportsRegistry;
 import org.cohorte.remote.IRemoteServicesConstants;
 import org.cohorte.remote.ImportEndpoint;
@@ -62,10 +61,6 @@ public class MulticastDiscovery implements IExportEndpointListener,
 
     /** The bundle context */
     private final BundleContext pBundleContext;
-
-    /** Exported endpoints dispatcher */
-    @Requires
-    private IExportsDispatcher pDispatcher;
 
     /** The dispatcher servlet */
     @Requires

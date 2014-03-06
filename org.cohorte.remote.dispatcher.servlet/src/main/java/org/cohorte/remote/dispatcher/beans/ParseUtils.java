@@ -30,7 +30,7 @@ import org.json.JSONObject;
  * 
  * @author Thomas Calmant
  */
-public class ParseUtils {
+public final class ParseUtils {
 
     /**
      * Converts a JSON array into a list

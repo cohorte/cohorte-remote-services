@@ -26,7 +26,7 @@ import java.util.LinkedList;
  * 
  * @author Thomas Calmant
  */
-public class EndpointUtils {
+public final class EndpointUtils {
 
     /** Default specification language */
     private static final String DEFAULT_LANGUAGE = "java";

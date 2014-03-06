@@ -529,7 +529,9 @@ public class ExportDispatcher implements IExportsDispatcher, ServiceListener {
 
         } catch (final InvalidSyntaxException ex) {
             // Bad luck
-            ex.printStackTrace();
+            pLogger.log(LogService.LOG_ERROR,
+                    "Error preparing the filter to detect services to export: "
+                            + ex, ex);
         }
     }
 }
