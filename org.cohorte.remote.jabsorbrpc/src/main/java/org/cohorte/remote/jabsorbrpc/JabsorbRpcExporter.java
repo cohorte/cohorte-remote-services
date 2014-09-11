@@ -30,7 +30,6 @@ import org.apache.felix.ipojo.annotations.Validate;
 import org.cohorte.remote.ExportEndpoint;
 import org.cohorte.remote.IRemoteServicesConstants;
 import org.cohorte.remote.IServiceExporter;
-import org.cohorte.remote.utilities.BundlesClassLoader;
 import org.cohorte.remote.utilities.RSUtils;
 import org.jabsorb.ng.JSONRPCBridge;
 import org.jabsorb.ng.JSONRPCServlet;
@@ -44,7 +43,7 @@ import org.osgi.service.log.LogService;
 
 /**
  * Implementation of the COHORTE JABSORB-RPC service exporter
- * 
+ *
  * @author Thomas Calmant
  */
 @Component(name = "cohorte-remote-exporter-jabsorb-factory")
@@ -93,7 +92,7 @@ public class JabsorbRpcExporter implements IServiceExporter {
 
     /**
      * Component constructed
-     * 
+     *
      * @param aContext
      *            The bundle context
      */
@@ -104,7 +103,7 @@ public class JabsorbRpcExporter implements IServiceExporter {
 
     /**
      * HTTP service ready: store its listening port
-     * 
+     *
      * @param aHttpService
      *            The bound service
      * @param aServiceProperties
@@ -137,7 +136,7 @@ public class JabsorbRpcExporter implements IServiceExporter {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.cohorte.remote.pelix.IServiceExporter#exportService(org.osgi.framework
      * .ServiceReference, java.lang.String, java.lang.String)
@@ -188,7 +187,7 @@ public class JabsorbRpcExporter implements IServiceExporter {
     /**
      * Prepares the String containing the list of URLs to access the Jabsorb
      * bridge servlet
-     * 
+     *
      * @return A comma-separated list of URLs
      */
     private String getAccesses() {
@@ -213,7 +212,7 @@ public class JabsorbRpcExporter implements IServiceExporter {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.cohorte.remote.pelix.IServiceExporter#handles(java.lang.String[])
      */
@@ -270,10 +269,6 @@ public class JabsorbRpcExporter implements IServiceExporter {
         // Set the bridge
         pJsonRpcBridge = JSONRPCBridge.getGlobalBridge();
 
-        // Set the serializer class loader
-        final BundlesClassLoader classLoader = new BundlesClassLoader(pContext);
-        JSONRPCBridge.getSerializer().setClassLoader(classLoader);
-
         // Set the HTTP session provider
         HTTPSessionFactory
                 .setHTTPSessionProvider(new JabsorbHttpSessionProvider());
@@ -304,13 +299,12 @@ public class JabsorbRpcExporter implements IServiceExporter {
 
         // Clean up references
         HTTPSessionFactory.setHTTPSessionProvider(null);
-        JSONRPCBridge.getSerializer().setClassLoader(null);
         pJsonRpcBridge = null;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.cohorte.remote.pelix.IServiceExporter#unexportService(org.cohorte
      * .remote.pelix.ExportEndpoint)
@@ -335,7 +329,7 @@ public class JabsorbRpcExporter implements IServiceExporter {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.cohorte.remote.pelix.IServiceExporter#updateExport(org.cohorte.remote
      * .pelix.ExportEndpoint, java.lang.String, java.util.Map)
