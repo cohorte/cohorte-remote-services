@@ -41,13 +41,16 @@ import org.osgi.service.log.LogService;
 
 /**
  * Implementation of the COHORTE JABSORB-RPC service importer
- * 
+ *
  * @author Thomas Calmant
  */
 @Component(name = "cohorte-remote-importer-jabsorb-factory")
 @Provides(specifications = IImportEndpointListener.class)
 @Instantiate(name = "cohorte-remote-importer-jabsorb")
 public class JabsorbRpcImporter implements IImportEndpointListener {
+
+    /** Endpoint UID -&gt; Jabsorb Client */
+    private final Map<String, Client> pClients = new LinkedHashMap<String, Client>();
 
     /** Supported export configurations */
     @Property(name = Constants.REMOTE_CONFIGS_SUPPORTED,
@@ -61,15 +64,15 @@ public class JabsorbRpcImporter implements IImportEndpointListener {
     @Requires
     private LogService pLogger;
 
-    /** Java proxy -gt; Jabsorb Client */
-    private final Map<Object, Client> pProxies = new LinkedHashMap<Object, Client>();
+    /** Endpoint UID -&gt; Proxy */
+    private final Map<String, Object> pProxies = new LinkedHashMap<String, Object>();
 
-    /** Imported services: Endpoint UID -gt; ServiceRegistration */
+    /** Imported services: Endpoint UID -&gt; ServiceRegistration */
     private final Map<String, ServiceRegistration<?>> pRegistrations = new LinkedHashMap<String, ServiceRegistration<?>>();
 
     /**
      * Component constructed
-     * 
+     *
      * @param aContext
      *            The bundle context
      */
@@ -81,7 +84,9 @@ public class JabsorbRpcImporter implements IImportEndpointListener {
     /**
      * Creates the Java proxy object to use the remote service, using Jabsorb
      * Client.
-     * 
+     *
+     * @param aUid
+     *            Endpoint UID
      * @param aName
      *            Endpoint name
      * @param aAccessUrl
@@ -90,8 +95,8 @@ public class JabsorbRpcImporter implements IImportEndpointListener {
      *            Object interfaces
      * @return The proxy object
      */
-    private Object createProxy(final String aName, final String aAccessUrl,
-            final Class<?>[] aClasses) {
+    private Object createProxy(final String aUid, final String aName,
+            final String aAccessUrl, final Class<?>[] aClasses) {
 
         // Prepare a bundle class loader
         final BundlesClassLoader classLoader = new BundlesClassLoader(pContext);
@@ -99,19 +104,20 @@ public class JabsorbRpcImporter implements IImportEndpointListener {
         // Create the Jabsorb client
         final ISession session = TransportRegistry.i()
                 .createSession(aAccessUrl);
-        final Client client = new Client(session, classLoader);
+        final Client client = new Client(session);
 
         // Create the proxy
         final Object proxy = client.openProxy(aName, classLoader, aClasses);
 
         // Store it
-        pProxies.put(proxy, client);
+        pClients.put(aUid, client);
+        pProxies.put(aUid, proxy);
         return proxy;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.cohorte.remote.pelix.IImportEndpointListener#endpointAdded(org.cohorte
      * .remote.pelix.ImportEndpoint)
@@ -183,7 +189,8 @@ public class JabsorbRpcImporter implements IImportEndpointListener {
         }
 
         // Register the service
-        final Object service = createProxy(name, accessUrl, classes);
+        final Object service = createProxy(aEndpoint.getUid(), name, accessUrl,
+                classes);
         final ServiceRegistration<?> svcReg = pContext.registerService(
                 aEndpoint.getSpecifications(), service,
                 new Hashtable<String, Object>(aEndpoint.getProperties()));
@@ -194,7 +201,7 @@ public class JabsorbRpcImporter implements IImportEndpointListener {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.cohorte.remote.pelix.IImportEndpointListener#endpointRemoved(org.
      * cohorte.remote.pelix.ImportEndpoint)
@@ -207,14 +214,17 @@ public class JabsorbRpcImporter implements IImportEndpointListener {
         if (svcReg == null) {
             // Unknown endpoint
             pLogger.log(LogService.LOG_DEBUG, "Unknown endpoint: " + uid);
+            return;
         }
-
         svcReg.unregister();
+
+        // Clean up
+        pClients.remove(uid).closeProxy(pProxies.remove(uid));
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.cohorte.remote.pelix.IImportEndpointListener#endpointUpdated(org.
      * cohorte.remote.pelix.ImportEndpoint, java.util.Map)
@@ -237,7 +247,7 @@ public class JabsorbRpcImporter implements IImportEndpointListener {
 
     /**
      * Tries to load remote service interfaces
-     * 
+     *
      * @param aSpecifications
      *            Remote service interfaces
      * @return An array of interfaces classes, or null
