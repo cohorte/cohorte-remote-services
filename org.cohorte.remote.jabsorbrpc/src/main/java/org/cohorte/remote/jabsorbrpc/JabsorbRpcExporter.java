@@ -65,7 +65,7 @@ public class JabsorbRpcExporter implements IServiceExporter {
     /** The bundle context */
     private final BundleContext pContext;
 
-    /** Exported services: Name -gt; ExportEndpoint */
+    /** Exported services: Name -&gt; ExportEndpoint */
     private final Map<String, ExportEndpoint> pEndpoints = new LinkedHashMap<String, ExportEndpoint>();
 
     /** Framework UID */
