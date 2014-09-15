@@ -22,7 +22,7 @@ import java.util.Map;
 
 /**
  * Represents an end point to access an imported service, using Pelix model
- * 
+ *
  * @author Thomas Calmant
  */
 public class ImportEndpoint {
@@ -50,7 +50,7 @@ public class ImportEndpoint {
 
     /**
      * Sets up the bean
-     * 
+     *
      * @param aUid
      *            Endpoint UID
      * @param aFramework
@@ -74,7 +74,8 @@ public class ImportEndpoint {
         pName = aName;
         pConfigurations = Arrays
                 .copyOf(aConfigurations, aConfigurations.length);
-        pSpecifications = EndpointUtils.extractSpecifications(aSpecifications);
+        pSpecifications = EndpointUtils.extractSpecifications(aSpecifications,
+                aProperties);
         if (aProperties != null) {
             pProperties.putAll(aProperties);
         }
@@ -82,7 +83,7 @@ public class ImportEndpoint {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -154,7 +155,7 @@ public class ImportEndpoint {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -166,7 +167,7 @@ public class ImportEndpoint {
 
     /**
      * Updates endpoint properties
-     * 
+     *
      * @param aProperties
      */
     public synchronized void setProperties(final Map<String, Object> aProperties) {
@@ -180,7 +181,7 @@ public class ImportEndpoint {
     /**
      * Lets a discovery provider set the address from which it heard about this
      * endpoint
-     * 
+     *
      * @param aServer
      *            the server to set
      */
@@ -197,7 +198,7 @@ public class ImportEndpoint {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

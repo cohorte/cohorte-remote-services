@@ -17,13 +17,17 @@ package org.cohorte.remote;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.Map;
+
+import org.osgi.framework.Constants;
 
 /**
  * Utility methods for the endpoints
- * 
+ *
  * @author Thomas Calmant
  */
 public final class EndpointUtils {
@@ -33,7 +37,7 @@ public final class EndpointUtils {
 
     /**
      * Escapes the interface string: replaces '%2F' by slashes '/'
-     * 
+     *
      * @param aSpecification
      *            Specification name
      * @return The escaped name
@@ -46,7 +50,7 @@ public final class EndpointUtils {
     /**
      * Extract the language and the interface from a "language:/interface"
      * interface name
-     * 
+     *
      * @param aSpec
      *            The formatted interface name
      * @return A [language, interface name] array
@@ -75,18 +79,33 @@ public final class EndpointUtils {
     }
 
     /**
-     * Converts "python:/name" specifications to "name". Keeps the other
-     * specifications as is.
-     * 
+     * Converts "java:/name" specifications to "name". Ignores other
+     * specifications.
+     *
      * @param aSpecifications
      *            The specifications found in a remote registration
+     * @param aProperties
+     *            Service properties
      * @return The filtered specifications
      */
-    public static String[] extractSpecifications(final String[] aSpecifications) {
+    public static String[] extractSpecifications(
+            final String[] aSpecifications,
+            final Map<String, Object> aProperties) {
 
+        // Compute the whole set of specifications
+        final Collection<String> allSpecs = new LinkedHashSet<String>();
+        allSpecs.addAll(Arrays.asList(aSpecifications));
+        if (aProperties != null) {
+            // Also check specifications from objectClass and synonyms
+            allSpecs.addAll(objectToIterable(aProperties
+                    .get(Constants.OBJECTCLASS)));
+            allSpecs.addAll(objectToIterable(aProperties
+                    .get(IRemoteServicesConstants.PROP_SYNONYMS)));
+        }
+
+        // Filter all found specifications
         final Collection<String> filteredSpecs = new LinkedHashSet<String>();
-
-        for (final String spec : aSpecifications) {
+        for (final String spec : allSpecs) {
             // Extract information
             final String[] parts = extractSpecificationParts(spec);
             if (DEFAULT_LANGUAGE.equals(parts[0])) {
@@ -100,7 +119,7 @@ public final class EndpointUtils {
 
     /**
      * Formats a "language://interface" string
-     * 
+     *
      * @param aLanguage
      *            Specification language
      * @param aSpecification
@@ -126,7 +145,7 @@ public final class EndpointUtils {
     /**
      * Transforms interfaces names into URI strings, with the interface
      * implementation language as a scheme.
-     * 
+     *
      * @param aFilteredSpecs
      *            Specifications to transform
      * @return The transformed names
@@ -145,8 +164,38 @@ public final class EndpointUtils {
     }
 
     /**
+     * Convert a String or an array of strings to a collection
+     *
+     * @param aRawObject
+     *            The String/array String object
+     * @return A collection of strings
+     */
+    public static Collection<String> objectToIterable(final Object aRawObject) {
+
+        final Collection<String> result = new LinkedList<String>();
+
+        if (aRawObject instanceof String) {
+            // Store the string
+            result.add((String) aRawObject);
+
+        } else if (aRawObject instanceof String[]) {
+            // Store the array
+            result.addAll(Arrays.asList((String[]) aRawObject));
+
+        } else if (aRawObject instanceof Collection) {
+            // Convert collection
+            final Collection<?> values = (Collection<?>) aRawObject;
+            for (final Object value : values) {
+                result.add((String) value);
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Unescapes the interface string: replaces '%2F' by slashes '/'
-     * 
+     *
      * @param aSpecification
      *            Specification name
      * @return The unescaped name

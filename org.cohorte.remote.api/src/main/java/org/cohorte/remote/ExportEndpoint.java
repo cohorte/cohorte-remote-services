@@ -28,7 +28,7 @@ import org.osgi.framework.ServiceReference;
 /**
  * Represents an export end point (one per group of configuration types), using
  * Pelix model
- * 
+ *
  * @author Thomas Calmant
  */
 public class ExportEndpoint {
@@ -56,7 +56,7 @@ public class ExportEndpoint {
 
     /**
      * Sets up members
-     * 
+     *
      * @param aUid
      *            Endpoint UID
      * @param aFrameworkUid
@@ -113,35 +113,25 @@ public class ExportEndpoint {
         final Collection<String> specs = new HashSet<String>(
                 Arrays.asList((String[]) pReference
                         .getProperty(Constants.OBJECTCLASS)));
-        Object rawExportedSpecs = pReference
+        final Object rawExportedSpecs = pReference
                 .getProperty(Constants.SERVICE_EXPORTED_INTERFACES);
 
-        // Result list
+        // Filter specifications
         final Collection<String> filteredSpecs = new LinkedList<String>();
-
-        if (rawExportedSpecs instanceof String) {
-            if ("*".equals(rawExportedSpecs)) {
-                // Export all specifications
-                filteredSpecs.addAll(specs);
-
-            } else if (specs.contains(rawExportedSpecs)) {
-                // Only one specification is exported
-                filteredSpecs.add(rawExportedSpecs.toString());
-
-            } else {
-                // Nothing to export
-                pExportedSpecs = new String[0];
-                return;
-            }
-
-        } else if (rawExportedSpecs instanceof String[]) {
-            // Convert the array to a collection
-            rawExportedSpecs = Arrays.asList((String[]) rawExportedSpecs);
+        if (rawExportedSpecs == null) {
+            // Nothing to export
+            pExportedSpecs = new String[0];
+            return;
         }
 
-        if (rawExportedSpecs instanceof Collection) {
-            @SuppressWarnings("unchecked")
-            final Collection<String> exportedSpecs = (Collection<String>) rawExportedSpecs;
+        if ("*".equals(rawExportedSpecs)) {
+            // Export all specifications
+            filteredSpecs.addAll(specs);
+
+        } else {
+            // Convert the property to a list
+            final Collection<String> exportedSpecs = EndpointUtils
+                    .objectToIterable(rawExportedSpecs);
             for (final String exportedSpec : exportedSpecs) {
                 if (specs.contains(exportedSpec)) {
                     filteredSpecs.add(exportedSpec);
@@ -160,7 +150,7 @@ public class ExportEndpoint {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -208,7 +198,7 @@ public class ExportEndpoint {
 
     /**
      * Returns merged properties
-     * 
+     *
      * @return the service properties merged with extra ones
      */
     public Map<String, Object> getProperties() {
@@ -250,7 +240,7 @@ public class ExportEndpoint {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -263,7 +253,7 @@ public class ExportEndpoint {
     /**
      * Returns the properties of this endpoint where export properties have been
      * replaced by import ones
-     * 
+     *
      * @return A dictionary with import properties
      */
     public Map<String, Object> makeImportProperties() {
@@ -295,7 +285,7 @@ public class ExportEndpoint {
 
     /**
      * Sets the new name of the endpoint
-     * 
+     *
      * @param aNewName
      *            The new endpoint name
      */
@@ -306,7 +296,7 @@ public class ExportEndpoint {
 
     /**
      * Converts this bean into a map, as used by the Pelix dispatcher servlet
-     * 
+     *
      * @return A map describing this endpoint
      */
     public Map<String, Object> toMap() {
@@ -328,7 +318,7 @@ public class ExportEndpoint {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override
