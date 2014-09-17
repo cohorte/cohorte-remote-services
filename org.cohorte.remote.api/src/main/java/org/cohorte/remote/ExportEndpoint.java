@@ -17,7 +17,6 @@ package org.cohorte.remote;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -110,9 +109,8 @@ public class ExportEndpoint {
     private void computeSpecifications() {
 
         // Service properties
-        final Collection<String> specs = new HashSet<String>(
-                Arrays.asList((String[]) pReference
-                        .getProperty(Constants.OBJECTCLASS)));
+        final Collection<String> specs = Arrays.asList((String[]) pReference
+                .getProperty(Constants.OBJECTCLASS));
         final Object rawExportedSpecs = pReference
                 .getProperty(Constants.SERVICE_EXPORTED_INTERFACES);
 
@@ -137,6 +135,14 @@ public class ExportEndpoint {
                     filteredSpecs.add(exportedSpec);
                 }
             }
+        }
+
+        // Filter rejected specifications
+        final Collection<String> rejectedSpecs = EndpointUtils
+                .objectToIterable(pReference
+                        .getProperty(IRemoteServicesConstants.PROP_EXPORT_REJECT));
+        if (rejectedSpecs != null) {
+            filteredSpecs.removeAll(rejectedSpecs);
         }
 
         // Format specifications strings

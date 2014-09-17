@@ -37,6 +37,13 @@ public interface IRemoteServicesConstants {
     String PROP_ENDPOINT_NAME = "endpoint.name";
 
     /**
+     * List of specifications that must never exported. Acts as a filter when
+     * exporting all other specifications with the "service.exported.interfaces"
+     * property set to "*"
+     */
+    String PROP_EXPORT_REJECT = "pelix.remote.export.reject";
+
+    /**
      * The UID of the framework that exports the service. This service property
      * is set by the discoverer, when it parses an end point event packet.
      */
