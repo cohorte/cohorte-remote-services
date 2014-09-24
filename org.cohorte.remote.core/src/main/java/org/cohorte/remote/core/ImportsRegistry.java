@@ -38,7 +38,7 @@ import org.osgi.service.log.LogService;
 
 /**
  * Implementation of the imports registry
- * 
+ *
  * @author Thomas Calmant
  */
 @Component(name = "cohorte-remote-registry-factory")
@@ -74,7 +74,7 @@ public class ImportsRegistry implements IImportsRegistry {
 
     /**
      * Component constructed
-     * 
+     *
      * @param aContext
      *            the bundle context
      */
@@ -132,7 +132,7 @@ public class ImportsRegistry implements IImportsRegistry {
 
     /**
      * Associates the given endpoint to a framework UID
-     * 
+     *
      * @param aFwUid
      *            A framework UID
      * @param aEndpoint
@@ -154,12 +154,13 @@ public class ImportsRegistry implements IImportsRegistry {
 
     /**
      * A new endpoint listener has been bound
-     * 
+     *
      * @param aListener
      *            An endpoint listener
      */
     @Bind(id = ID_LISTENERS)
-    private void bindListener(final IImportEndpointListener aListener) {
+    private synchronized void bindListener(
+            final IImportEndpointListener aListener) {
 
         if (pValidated) {
             for (final ImportEndpoint endpoint : pRegistry.values()) {

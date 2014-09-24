@@ -23,8 +23,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.osgi.framework.Constants;
-
 /**
  * Utility methods for the endpoints
  *
@@ -93,12 +91,10 @@ public final class EndpointUtils {
             final Map<String, Object> aProperties) {
 
         // Compute the whole set of specifications
-        final Collection<String> allSpecs = new LinkedHashSet<String>();
-        allSpecs.addAll(Arrays.asList(aSpecifications));
+        final Collection<String> allSpecs = new LinkedHashSet<String>(
+                Arrays.asList(aSpecifications));
         if (aProperties != null) {
-            // Also check specifications from objectClass and synonyms
-            allSpecs.addAll(objectToIterable(aProperties
-                    .get(Constants.OBJECTCLASS)));
+            // Also check specifications from synonyms
             allSpecs.addAll(objectToIterable(aProperties
                     .get(IRemoteServicesConstants.PROP_SYNONYMS)));
         }
