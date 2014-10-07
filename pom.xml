@@ -27,6 +27,7 @@
         <module>org.cohorte.remote.dispatcher.servlet</module>
         <module>org.cohorte.remote.discovery.multicast</module>
         <module>org.cohorte.remote.jabsorbrpc</module>
+        <module>cohorte-remote-package</module>
     </modules>
 
     <properties>
