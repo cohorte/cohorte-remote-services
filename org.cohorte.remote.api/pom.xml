@@ -4,9 +4,9 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.cohorte</groupId>
-		<artifactId>cohorte-remote-services</artifactId>
-		<version>1.2.0-SNAPSHOT</version>
+	    <groupId>org.cohorte.remote</groupId>
+	    <artifactId>cohorte-remote-services</artifactId>
+	    <version>1.2.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>org.cohorte.remote.api</artifactId>
