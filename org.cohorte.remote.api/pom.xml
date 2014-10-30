@@ -4,9 +4,9 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-	    <groupId>org.cohorte.remote</groupId>
-	    <artifactId>cohorte-remote-services</artifactId>
-	    <version>1.2.0-SNAPSHOT</version>
+		<groupId>org.cohorte.remote</groupId>
+		<artifactId>cohorte-remote-services</artifactId>
+		<version>1.2.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>org.cohorte.remote.api</artifactId>
@@ -16,6 +16,10 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -32,6 +36,10 @@
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Bundle-Vendor>isandlaTech.com</Bundle-Vendor>
 						<Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
+						<Import-Package>
+							org.osgi.framework,
+							org.osgi.service.remoteserviceadmin;version=1.0
+						</Import-Package>
 						<Export-Package>
 							org.cohorte.remote;version=1.2.0
 						</Export-Package>

@@ -43,12 +43,6 @@ public interface IRemoteServicesConstants {
      */
     String PROP_EXPORT_REJECT = "pelix.remote.export.reject";
 
-    /**
-     * The UID of the framework that exports the service. This service property
-     * is set by the discoverer, when it parses an end point event packet.
-     */
-    String PROP_FRAMEWORK_UID = "pelix.remote.framework.uid";
-
     /** Exported interfaces synonyms (String[]) */
     String PROP_SYNONYMS = "pelix.remote.synonyms";
 

@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.remoteserviceadmin.RemoteConstants;
 
 /**
  * Represents an export end point (one per group of configuration types), using
@@ -156,7 +157,7 @@ public class ExportEndpoint {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -246,7 +247,7 @@ public class ExportEndpoint {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -283,7 +284,7 @@ public class ExportEndpoint {
         importProperties.remove(Constants.SERVICE_EXPORTED_INTERFACES);
 
         // Add the framework UID
-        importProperties.put(IRemoteServicesConstants.PROP_FRAMEWORK_UID,
+        importProperties.put(RemoteConstants.ENDPOINT_FRAMEWORK_UUID,
                 pFrameworkUid);
 
         return importProperties;
@@ -324,7 +325,7 @@ public class ExportEndpoint {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
