@@ -5,6 +5,10 @@ This project is an implementation of the OSGi Remote Services specification.
 It is uses JSON-RPC as the transport protocol and is based on the
 `Cohorte Jabsorb Fork <https://github.com/isandlaTech/cohorte-org.jabsorb.ng>`_.
 
+The specification of OSGi Remote Services is available in the
+`OSGi Enterprise specification <http://www.osgi.org/download/r5/osgi.enterprise-5.0.0.pdf>`_, chapter 100.
+The specification of endpoint description beans is given in the
+`OSGi Compendium specification <http://www.osgi.org/download/r5/osgi.cmpn-5.0.0.pdf>`_, chapter 122.
 
 Compilation
 ***********
@@ -37,4 +41,5 @@ directory.
 License
 *******
 
-This project is released under the Apache License 2.0
+This project is released under the terms of the
+`Apache Software License 2.0 <http://www.apache.org/licenses/LICENSE-2.0)>`_.
