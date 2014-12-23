@@ -10,6 +10,8 @@ The specification of OSGi Remote Services is available in the
 The specification of endpoint description beans is given in the
 `OSGi Compendium specification <http://www.osgi.org/download/r5/osgi.cmpn-5.0.0.pdf>`_, chapter 122.
 
+For more information, see the `wiki <https://github.com/isandlaTech/cohorte-remote-services/wiki>`_.
+
 Compilation
 ***********
 
