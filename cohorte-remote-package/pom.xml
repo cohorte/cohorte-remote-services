@@ -28,7 +28,10 @@
 			<groupId>org.cohorte.remote</groupId>
 			<artifactId>org.cohorte.remote.core</artifactId>
 			<version>${project.version}</version>
-		</dependency>
+		</dependency>		
+		<!--
+			SEE ISSUE #6 (isandlaTech/cohorte-platforms)
+			
 		<dependency>
 			<groupId>org.cohorte.remote</groupId>
 			<artifactId>org.cohorte.remote.dispatcher.servlet</artifactId>
@@ -44,6 +47,7 @@
 			<artifactId>org.cohorte.remote.jabsorbrpc</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		-->
 	</dependencies>
 
 </project>
