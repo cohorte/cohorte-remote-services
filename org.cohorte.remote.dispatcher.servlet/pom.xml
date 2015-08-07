@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.cohorte.remote</groupId>
 		<artifactId>cohorte-remote-services</artifactId>
-		<version>1.2.0</version>
+		<version>1.2.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>org.cohorte.remote.dispatcher.servlet</artifactId>
@@ -74,7 +74,7 @@
 						<Import-Package>
 							javax.servlet;version=2.5.0,
 							javax.servlet.http;version=2.5.0,
-							org.cohorte.remote;version=1.2.0,
+							org.cohorte.remote;version=1.2.1.qualifier,
 							org.cohorte.remote.utilities;version=1.0.0,
 							org.json,
 							org.osgi.framework;version=1.7.0,

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.cohorte.remote</groupId>
 		<artifactId>cohorte-remote-services</artifactId>
-		<version>1.2.0</version>
+		<version>1.2.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>org.cohorte.remote.api</artifactId>
@@ -41,7 +41,7 @@
 							org.osgi.service.remoteserviceadmin;version=1.0
 						</Import-Package>
 						<Export-Package>
-							org.cohorte.remote;version=1.2.0
+							org.cohorte.remote;version=1.2.1.qualifier
 						</Export-Package>
 					</instructions>
 				</configuration>
