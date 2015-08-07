@@ -1,0 +1,7 @@
+
+de 1.2.0 (release 1.1) à 1.2.1
+
+- MOD_OG_20150713
+    Convert stacktrace error to a simple warning when the remote exporter haven't specification for a service. 
+    This issue isn't an error, but only a indicator to limit the export of the service.
+
