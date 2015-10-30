@@ -1,0 +1,18 @@
+Changes form the 1.2.0 to 1.2.1
+-------------------------------
+
+** Improvements
+	* Removing versions from Imported Packages in Manifest files
+
+Changes form the 1.1.9 to 1.2.0
+-------------------------------
+
+** New Features
+	* Added support for the "pelix.remote.export.reject" property
+
+** Improvements	
+	* Added support for synonyms [#4]
+    * Proxies are now cleaned up when endpoint is removed
+    
+** Bug Fix
+    * Replace the Pelix framework UID constant by the OSGi standard one [#5]
