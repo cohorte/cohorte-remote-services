@@ -40,7 +40,7 @@
 						<Bundle-RequiredExecutionEnvironment>JavaSE-1.6</Bundle-RequiredExecutionEnvironment>
 
 						<Import-Package>org.osgi.framework</Import-Package>
-						<Export-Package>org.cohorte.remote.utilities;version="1.0.0"</Export-Package>
+						<Export-Package>org.cohorte.remote.utilities</Export-Package>
 					</instructions>
 				</configuration>
 			</plugin>
