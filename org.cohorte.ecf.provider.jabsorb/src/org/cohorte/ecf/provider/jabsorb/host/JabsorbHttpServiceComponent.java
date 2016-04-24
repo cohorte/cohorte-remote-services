@@ -15,7 +15,6 @@
  */
 package org.cohorte.ecf.provider.jabsorb.host;
 
-import java.net.URI;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -25,9 +24,6 @@ import javax.servlet.ServletException;
 import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
 import org.jabsorb.ng.JSONRPCBridge;
 import org.jabsorb.ng.JSONRPCServlet;
-import org.jabsorb.ng.client.HTTPSessionFactory;
-import org.jabsorb.ng.client.IHTTPSession;
-import org.jabsorb.ng.client.IHTTPSessionProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -78,13 +74,6 @@ public class JabsorbHttpServiceComponent {
         // Prepare the bridge
         pJabsorbRpcBridge = JSONRPCBridge.getGlobalBridge();
 
-        // Set the HTTP session provider
-        HTTPSessionFactory.setHTTPSessionProvider(new IHTTPSessionProvider() {
-			@Override
-			public IHTTPSession newHTTPSession(URI arg0) throws Exception {
-				return new JabsorbHttpSession(arg0);
-			}});
-        
         sInstance = this;
     }
 

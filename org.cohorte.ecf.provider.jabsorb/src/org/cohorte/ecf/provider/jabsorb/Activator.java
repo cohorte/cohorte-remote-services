@@ -15,10 +15,12 @@
  */
 package org.cohorte.ecf.provider.jabsorb;
 
+import java.net.URI;
 import java.util.Map;
 
 import org.cohorte.ecf.provider.jabsorb.client.JabsorbClientContainer;
 import org.cohorte.ecf.provider.jabsorb.host.JabsorbHostContainer;
+import org.cohorte.ecf.provider.jabsorb.host.JabsorbHttpSession;
 import org.cohorte.ecf.provider.jabsorb.identity.JabsorbNamespace;
 import org.eclipse.ecf.core.ContainerTypeDescription;
 import org.eclipse.ecf.core.IContainer;
@@ -27,6 +29,9 @@ import org.eclipse.ecf.core.util.SystemLogService;
 import org.eclipse.ecf.remoteservice.provider.IRemoteServiceDistributionProvider;
 import org.eclipse.ecf.remoteservice.provider.RemoteServiceContainerInstantiator;
 import org.eclipse.ecf.remoteservice.provider.RemoteServiceDistributionProvider;
+import org.jabsorb.ng.client.HTTPSessionFactory;
+import org.jabsorb.ng.client.IHTTPSession;
+import org.jabsorb.ng.client.IHTTPSessionProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
@@ -115,6 +120,13 @@ public class Activator implements BundleActivator {
 
 		sSingleton = this;
 		pContext = bundleContext;
+        // Set the HTTP session provider
+        HTTPSessionFactory.setHTTPSessionProvider(new IHTTPSessionProvider() {
+			@Override
+			public IHTTPSession newHTTPSession(URI arg0) throws Exception {
+				return new JabsorbHttpSession(arg0);
+			}});
+        
 		pContext.registerService(Namespace.class, new JabsorbNamespace(), null);
 		// register this remote service distribution provider
 		pContext.registerService(IRemoteServiceDistributionProvider.class,
