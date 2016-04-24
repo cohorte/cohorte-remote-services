@@ -15,14 +15,7 @@
  */
 package org.cohorte.ecf.provider.jabsorb;
 
-import java.util.Dictionary;
-import java.util.regex.Pattern;
-
-import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.core.util.Trace;
-import org.eclipse.ecf.remoteservice.client.RemoteServiceClientRegistration;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
 
 /**
  * Utility methods for host and client containers
@@ -31,236 +24,123 @@ import org.osgi.framework.ServiceReference;
  */
 public class Utilities {
 
-    /** Access URIs separator */
-    public static final String URI_SEPARATOR = ",";
+	/**
+	 * Logs (and traces) a message
+	 * 
+	 * @param aLevel
+	 *            Log level
+	 * @param aMethodName
+	 *            Calling method name
+	 * @param aClass
+	 *            Class of the calling method
+	 * @param aMessage
+	 *            Message to log
+	 */
+	public static void log(final int aLevel, final String aMethodName, final Class<?> aClass, final String aMessage) {
 
-    /**
-     * Transforms the given string of URIs into a list of URIs
-     * 
-     * @param aAccessProperty
-     *            A string made with {@link #makeAccesses(String[])}
-     * @return An array of URIs (can be empty)
-     */
-    public static String[] getAccesses(final String aAccessProperty) {
+		log(aLevel, aMessage, aClass, aMessage, null);
+	}
 
-        return aAccessProperty.split(Pattern.quote(URI_SEPARATOR));
-    }
+	/**
+	 * Logs (and traces) a message and its error
+	 * 
+	 * @param aLevel
+	 *            Log level
+	 * @param aMethodName
+	 *            Calling method name
+	 * @param aClass
+	 *            Class of the calling method
+	 * @param aMessage
+	 *            Message to log
+	 * @param aThrowable
+	 *            An exception
+	 */
+	public static void log(final int aLevel, final String aMethodName, final Class<?> aClass, final String aMessage,
+			final Throwable aThrowable) {
 
-    /**
-     * Generates an endpoint name according to the properties in the given
-     * dictionary
-     * 
-     * @param aDictionary
-     *            Properties of a service
-     * @return The endpoint name
-     * @throws ECFException
-     *             Values used to generate a name are null or invalid
-     */
-    @SuppressWarnings("rawtypes")
-    public static String getEndpointName(final Dictionary aDictionary)
-            throws ECFException {
+		// Trace the message
+		if (aThrowable != null) {
+			traceDebug(aMethodName, aClass, aMessage + ": " + aThrowable);
 
-        return getEndpointName(
-                (String) aDictionary.get(JabsorbConstants.PROP_ENDPOINT_NAME),
-                (Long) aDictionary.get(JabsorbConstants.ENDPOINT_SERVICE_ID),
-                (Long) aDictionary.get(Constants.SERVICE_ID));
-    }
+		} else {
+			traceDebug(aMethodName, aClass, aMessage);
+		}
 
-    /**
-     * Generates an endpoint name according to the properties from the given
-     * registration bean
-     * 
-     * @param aRegistration
-     *            Remote Service registration bean
-     * @return The endpoint name
-     * @throws ECFException
-     *             Values used to generate a name are null or invalid
-     */
-    public static String getEndpointName(
-            final RemoteServiceClientRegistration aRegistration)
-            throws ECFException {
+		// Forge a log message
+		final StringBuilder logMessage = new StringBuilder();
+		if (aClass != null) {
+			// Set the class name
+			logMessage.append(aClass.getName()).append(".");
+		}
 
-        return getEndpointName(
-                (String) aRegistration
-                        .getProperty(JabsorbConstants.PROP_ENDPOINT_NAME),
-                (Long) aRegistration
-                        .getProperty(JabsorbConstants.ENDPOINT_SERVICE_ID),
-                null);
-    }
+		// Set the method name and the message
+		logMessage.append(aMethodName).append("(): ").append(aMessage);
 
-    /**
-     * Generates an endpoint name according to the properties from the given
-     * service reference
-     * 
-     * @param aServiceReference
-     *            A service reference
-     * @return The endpoint name
-     * @throws ECFException
-     *             Values used to generate a name are null or invalid
-     */
-    public static String getEndpointName(
-            final ServiceReference<?> aServiceReference) throws ECFException {
+		// Log it
+		Activator.get().log(aLevel, aMessage, aThrowable);
+	}
 
-        return getEndpointName(
-                (String) aServiceReference
-                        .getProperty(JabsorbConstants.PROP_ENDPOINT_NAME),
-                (Long) aServiceReference
-                        .getProperty(JabsorbConstants.ENDPOINT_SERVICE_ID),
-                (Long) aServiceReference.getProperty(Constants.SERVICE_ID));
-    }
+	/**
+	 * Prepares a string containing all access URIs, separated by
+	 * {@link #URI_SEPARATOR}
+	 * 
+	 * @param aAccessURIs
+	 *            A list of access URIs
+	 * @return A string (can be empty)
+	 */
+	public static String makeAccesses(final String[] aAccessURIs) {
 
-    /**
-     * Generates an endpoint name from the given property values
-     * 
-     * @param aEndpointName
-     *            Endpoint name property value
-     * @param aRemoteId
-     *            Remote service ID property value (for consumer)
-     * @param aServiceId
-     *            Local service ID (for host)
-     * @return The endpoint name (given or generated)
-     * @throws ECFException
-     *             Both given values are null or incorrect
-     */
-    public static String getEndpointName(final String aEndpointName,
-            final Long aRemoteId, final Long aServiceId) throws ECFException {
+		final StringBuilder builder = new StringBuilder();
+		for (final String uri : aAccessURIs) {
+			// Separate URIs with a ','
+			builder.append(uri).append(',');
+		}
 
-        if (aEndpointName != null && !aEndpointName.isEmpty()) {
-            // Valid endpoint name
-            return aEndpointName;
+		// Remove the trailing ','
+		if (builder.length() != 0) {
+			builder.deleteCharAt(builder.length() - 1);
+		}
 
-        } else if (aRemoteId != null && aRemoteId != 0) {
-            return "service_" + aRemoteId;
+		return builder.toString();
+	}
 
-        } else if (aServiceId != null && aServiceId != 0) {
-            return "service_" + aServiceId;
-        }
+	/**
+	 * Traces a message using the ECF tracing API
+	 * 
+	 * @param aMethodName
+	 *            Tracing method
+	 * @param aDebugOption
+	 *            Eclipse tracing flag name (e.g. ecf.jabsorb/debug)
+	 * @param aClass
+	 *            Class of the tracing method
+	 * @param aMessage
+	 *            Message to trace
+	 */
+	public static void trace(final String aMethodName, final String aDebugOption, final Class<?> aClass,
+			final String aMessage) {
 
-        throw new ECFException("No endpoint name to generate");
-    }
+		Trace.trace(Activator.PLUGIN_ID, aDebugOption, aClass, aMethodName, aMessage);
+	}
 
-    /**
-     * Logs (and traces) a message
-     * 
-     * @param aLevel
-     *            Log level
-     * @param aMethodName
-     *            Calling method name
-     * @param aClass
-     *            Class of the calling method
-     * @param aMessage
-     *            Message to log
-     */
-    public static void log(final int aLevel, final String aMethodName,
-            final Class<?> aClass, final String aMessage) {
+	/**
+	 * Traces a message using the ECF tracing API
+	 * 
+	 * @param aMethodName
+	 *            Tracing method
+	 * @param aClass
+	 *            Class of the tracing method
+	 * @param aMessage
+	 *            Message to trace
+	 */
+	public static void traceDebug(final String aMethodName, final Class<?> aClass, final String aMessage) {
 
-        log(aLevel, aMessage, aClass, aMessage, null);
-    }
+		Trace.trace(Activator.PLUGIN_ID, "debug", aClass, aMethodName, aMessage);
+	}
 
-    /**
-     * Logs (and traces) a message and its error
-     * 
-     * @param aLevel
-     *            Log level
-     * @param aMethodName
-     *            Calling method name
-     * @param aClass
-     *            Class of the calling method
-     * @param aMessage
-     *            Message to log
-     * @param aThrowable
-     *            An exception
-     */
-    public static void log(final int aLevel, final String aMethodName,
-            final Class<?> aClass, final String aMessage,
-            final Throwable aThrowable) {
+	/**
+	 * Hidden constructor
+	 */
+	private Utilities() {
 
-        // Trace the message
-        if (aThrowable != null) {
-            traceDebug(aMethodName, aClass, aMessage + ": " + aThrowable);
-
-        } else {
-            traceDebug(aMethodName, aClass, aMessage);
-        }
-
-        // Forge a log message
-        final StringBuilder logMessage = new StringBuilder();
-        if (aClass != null) {
-            // Set the class name
-            logMessage.append(aClass.getName()).append(".");
-        }
-
-        // Set the method name and the message
-        logMessage.append(aMethodName).append("(): ").append(aMessage);
-
-        // Log it
-        Activator.get().log(aLevel, aMessage, aThrowable);
-    }
-
-    /**
-     * Prepares a string containing all access URIs, separated by
-     * {@link #URI_SEPARATOR}
-     * 
-     * @param aAccessURIs
-     *            A list of access URIs
-     * @return A string (can be empty)
-     */
-    public static String makeAccesses(final String[] aAccessURIs) {
-
-        final StringBuilder builder = new StringBuilder();
-        for (final String uri : aAccessURIs) {
-            // Separate URIs with a ','
-            builder.append(uri).append(',');
-        }
-
-        // Remove the trailing ','
-        if (builder.length() != 0) {
-            builder.deleteCharAt(builder.length() - 1);
-        }
-
-        return builder.toString();
-    }
-
-    /**
-     * Traces a message using the ECF tracing API
-     * 
-     * @param aMethodName
-     *            Tracing method
-     * @param aDebugOption
-     *            Eclipse tracing flag name (e.g. ecf.jabsorb/debug)
-     * @param aClass
-     *            Class of the tracing method
-     * @param aMessage
-     *            Message to trace
-     */
-    public static void trace(final String aMethodName,
-            final String aDebugOption, final Class<?> aClass,
-            final String aMessage) {
-
-        Trace.trace(Activator.PLUGIN_ID, aDebugOption, aClass, aMethodName,
-                aMessage);
-    }
-
-    /**
-     * Traces a message using the ECF tracing API
-     * 
-     * @param aMethodName
-     *            Tracing method
-     * @param aClass
-     *            Class of the tracing method
-     * @param aMessage
-     *            Message to trace
-     */
-    public static void traceDebug(final String aMethodName,
-            final Class<?> aClass, final String aMessage) {
-
-        Trace.trace(Activator.PLUGIN_ID, "debug", aClass, aMethodName, aMessage);
-    }
-
-    /**
-     * Hidden constructor
-     */
-    private Utilities() {
-
-    }
+	}
 }

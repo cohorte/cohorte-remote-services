@@ -15,12 +15,7 @@
  */
 package org.cohorte.ecf.provider.jabsorb.host;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -28,16 +23,14 @@ import java.util.Set;
 import javax.servlet.ServletException;
 
 import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
-import org.cohorte.ecf.provider.jabsorb.Utilities;
-import org.cohorte.remote.utilities.BundlesClassLoader;
-import org.eclipse.ecf.remoteservice.servlet.HttpServiceComponent;
 import org.jabsorb.ng.JSONRPCBridge;
 import org.jabsorb.ng.JSONRPCServlet;
 import org.jabsorb.ng.client.HTTPSessionFactory;
+import org.jabsorb.ng.client.IHTTPSession;
+import org.jabsorb.ng.client.IHTTPSessionProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import org.osgi.service.log.LogService;
 
 /**
  * A BluePrint component that keeps track of all registered {@link HttpService}.
@@ -46,7 +39,7 @@ import org.osgi.service.log.LogService;
  * 
  * @author Thomas Calmant
  */
-public class JabsorbHttpServiceComponent extends HttpServiceComponent {
+public class JabsorbHttpServiceComponent {
 
     /** Possible HTTP Service properties to get its listening port */
     private static final String[] HTTP_PORT_PROPERTIES = { "http.port",
@@ -81,29 +74,17 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.ecf.remoteservice.servlet.HttpServiceComponent#activate(org
-     * .osgi.framework.BundleContext)
-     */
-    @Override
-    protected void activate(final BundleContext aCtxt) throws Exception {
-
+    void activate(final BundleContext aCtxt) throws Exception {
         // Prepare the bridge
         pJabsorbRpcBridge = JSONRPCBridge.getGlobalBridge();
 
         // Set the HTTP session provider
-        HTTPSessionFactory
-                .setHTTPSessionProvider(new JabsorbHttpSessionProvider());
-
-        // Set the serializer class loader
-        JSONRPCBridge.getSerializer().setClassLoader(
-                new BundlesClassLoader(aCtxt));
-
-        // Let the component be activated
-        super.activate(aCtxt);
+        HTTPSessionFactory.setHTTPSessionProvider(new IHTTPSessionProvider() {
+			@Override
+			public IHTTPSession newHTTPSession(URI arg0) throws Exception {
+				return new JabsorbHttpSession(arg0);
+			}});
+        
         sInstance = this;
     }
 
@@ -115,11 +96,8 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
      * @param aProperties
      *            The service properties
      */
-    protected void bindHttpService(final HttpService aHttpService,
+    void bindHttpService(final HttpService aHttpService,
             final Map<String, ?> aProperties) {
-
-        // Let the parent to the binding
-        super.bindHttpService(aHttpService);
 
         // Get the port
         final int port = extractHttpPort(aProperties);
@@ -129,7 +107,7 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
 
         // Register the Jabsorb servlet
         try {
-            aHttpService.registerServlet(JabsorbConstants.HOST_SERVLET_PATH,
+            aHttpService.registerServlet(JabsorbConstants.HOST_DEFAULT_SERVLETPATH,
                     new JSONRPCServlet(), null, null);
 
         } catch (final ServletException ex) {
@@ -141,22 +119,10 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.ecf.remoteservice.servlet.HttpServiceComponent#deactivate()
-     */
-    @Override
-    protected void deactivate() throws Exception {
-
+    void deactivate() throws Exception {
         // Clean up
         pEndpoints.clear();
-        JSONRPCBridge.getSerializer().setClassLoader(null);
         sInstance = null;
-
-        // Deactivate the component
-        super.deactivate();
     }
 
     /**
@@ -192,60 +158,6 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
     }
 
     /**
-     * Retrieves all possible accesses to the bound HTTP services
-     * 
-     * @return An array of URI strings, can be empty but never null
-     */
-    public String[] getAccesses() {
-
-        final Set<String> accesses = new LinkedHashSet<String>();
-
-        try {
-            // Get all network interfaces
-            final Enumeration<NetworkInterface> interfaces = NetworkInterface
-                    .getNetworkInterfaces();
-
-            while (interfaces.hasMoreElements()) {
-                // For each interface...
-                final NetworkInterface netInterface = interfaces.nextElement();
-                final Enumeration<InetAddress> addresses = netInterface
-                        .getInetAddresses();
-                while (addresses.hasMoreElements()) {
-                    // For each address of this interface...
-                    final InetAddress address = addresses.nextElement();
-
-                    // Prepare a URI
-                    for (final int port : pHttpPorts) {
-                        try {
-                            accesses.add(new URI("http", null, address
-                                    .getHostAddress(), port,
-                                    JabsorbConstants.HOST_SERVLET_PATH, null,
-                                    null).toString());
-
-                        } catch (final URISyntaxException ex) {
-                            // Bad URI
-                            Utilities.traceDebug("getAccesses", getClass(),
-                                    "Bad URI: " + ex);
-                        }
-                    }
-                }
-            }
-
-        } catch (final SocketException ex) {
-            Utilities.log(LogService.LOG_ERROR, "getAccesses", getClass(),
-                    "Can't compute socket accesses");
-        }
-
-        if (accesses.isEmpty()) {
-            Utilities.log(LogService.LOG_ERROR, "getAccesses", getClass(),
-                    "No HTTP access has been found");
-        }
-
-        // No service available
-        return accesses.toArray(new String[0]);
-    }
-
-    /**
      * Registers a service with the given name
      * 
      * @param aEndpointName
@@ -278,7 +190,7 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
             final Map<String, ?> aProperties) {
 
         // Unregister the servlet from the lost service
-        aHttpService.unregister(JabsorbConstants.HOST_SERVLET_PATH);
+        aHttpService.unregister(JabsorbConstants.HOST_DEFAULT_SERVLETPATH);
 
         // Forget the port
         final int port = extractHttpPort(aProperties);
@@ -286,8 +198,6 @@ public class JabsorbHttpServiceComponent extends HttpServiceComponent {
             pHttpPorts.remove(port);
         }
 
-        // Let the parent clean up
-        super.unbindHttpService(aHttpService);
     }
 
     /**

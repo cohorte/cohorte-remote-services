@@ -11,7 +11,7 @@
 	</parent>
 	<artifactId>org.cohorte.ecf.provider.jabsorb</artifactId>
 	<!--<version>1.0.0</version>-->
-	<packaging>eclipse-plugin</packaging>
+	<!-- <packaging>eclipse-plugin</packaging> -->
 
 	<properties>
 		<tycho-version>0.19.0</tycho-version>
@@ -35,20 +35,20 @@
 
 	<dependencies>
 		<!-- Use Cohorte version of Jabsorb -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.cohorte</groupId>
 			<artifactId>org.jabsorb.ng</artifactId>
 			<version>1.1.0</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>-->
 
 		<!-- Required for the BundleClassLoader -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.cohorte</groupId>
 			<artifactId>org.cohorte.remote.utilities</artifactId>
 			<version>${project.parent.version}</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency>-->
 	</dependencies>
 
 	<build>

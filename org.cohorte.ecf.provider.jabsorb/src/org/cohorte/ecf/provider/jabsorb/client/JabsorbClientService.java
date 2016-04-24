@@ -21,15 +21,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.cohorte.ecf.provider.jabsorb.Activator;
-import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
 import org.cohorte.ecf.provider.jabsorb.Utilities;
-import org.cohorte.remote.utilities.BundlesClassLoader;
 import org.eclipse.ecf.core.util.ECFException;
-import org.eclipse.ecf.remoteservice.IRemoteCall;
+import org.eclipse.ecf.remoteservice.Constants;
 import org.eclipse.ecf.remoteservice.client.AbstractClientContainer;
-import org.eclipse.ecf.remoteservice.client.AbstractClientService;
-import org.eclipse.ecf.remoteservice.client.IRemoteCallable;
+import org.eclipse.ecf.remoteservice.client.AbstractRSAClientService;
 import org.eclipse.ecf.remoteservice.client.RemoteServiceClientRegistration;
 import org.jabsorb.ng.client.Client;
 import org.jabsorb.ng.client.ISession;
@@ -41,16 +37,13 @@ import org.osgi.service.log.LogService;
  * 
  * @author Thomas Calmant
  */
-public class JabsorbClientService extends AbstractClientService {
+public class JabsorbClientService extends AbstractRSAClientService {
 
     /** The Jabsorb client */
     private final Client pClient;
 
     /** Service interfaces */
     private final List<Class<?>> pInterfaces = new LinkedList<Class<?>>();
-
-    /** A classloader that walks through bundles */
-    private final ClassLoader pLoader;
 
     /** The service proxy */
     private final Object pProxy;
@@ -68,9 +61,6 @@ public class JabsorbClientService extends AbstractClientService {
             throws ECFException {
 
         super(aContainer, aRegistration);
-
-        // Setup the class loader
-        pLoader = new BundlesClassLoader(Activator.get().getContext());
 
         // Setup the client
         pClient = setupClient();
@@ -93,7 +83,7 @@ public class JabsorbClientService extends AbstractClientService {
         pInterfaces.clear();
         for (final String className : registration.getClazzes()) {
             try {
-                pInterfaces.add(pLoader.loadClass(className));
+                pInterfaces.add(this.getClass().getClassLoader().loadClass(className));
 
             } catch (final ClassNotFoundException ex) {
                 // Ignore unknown class
@@ -109,8 +99,10 @@ public class JabsorbClientService extends AbstractClientService {
         }
 
         // Create the proxy
-        return pClient.openProxy(Utilities.getEndpointName(registration),
-                pLoader, pInterfaces.toArray(new Class<?>[0]));
+        String serviceKey = String.valueOf(registration.getProperty(Constants.SERVICE_ID));
+        
+        return pClient.openProxy(serviceKey,
+                this.getClass().getClassLoader(), pInterfaces.toArray(new Class<?>[pInterfaces.size()]));
     }
 
     /**
@@ -188,64 +180,52 @@ public class JabsorbClientService extends AbstractClientService {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.eclipse.ecf.remoteservice.client.AbstractClientService#invokeRemoteCall
-     * (org.eclipse.ecf.remoteservice.IRemoteCall,
-     * org.eclipse.ecf.remoteservice.client.IRemoteCallable)
+    /**
+     * Sets up the client according to the registration properties
      */
-    @Override
-    protected Object invokeRemoteCall(final IRemoteCall aCall,
-            final IRemoteCallable aCallable) throws ECFException {
+    private Client setupClient() {
 
+        final String uri = (String) registration.getProperty(Constants.ENDPOINT_ID);
+        if (uri == null) 
+        	throw new NullPointerException("Remote service property "+Constants.ENDPOINT_ID+" is not set");
+
+        // Prepare the session
+        final ISession session = TransportRegistry.i().createSession(uri);
+
+        // Set up the client
+        return new Client(session);
+    }
+
+	@Override
+	protected Object invokeAsync(RSARemoteCall remoteCall) throws ECFException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected Object invokeSync(RSARemoteCall remoteCall) throws ECFException {
         // Normalize parameters
-        Object[] parameters = aCall.getParameters();
+        Object[] parameters = remoteCall.getParameters();
         if (parameters == null) {
             parameters = new Object[0];
         }
 
         // Look for the method
-        final Method method = getMethod(aCall.getMethod(), parameters.length);
+        final Method method = getMethod(remoteCall.getMethod(), parameters.length);
         if (method == null) {
             throw new ECFException("Can't find a method called "
-                    + aCall.getMethod() + " with " + parameters.length
+                    + remoteCall.getMethod() + " with " + parameters.length
                     + " arguments");
         }
 
         try {
             // Call the method
-            return pClient.invoke(pProxy, method, aCall.getParameters());
+            return pClient.invoke(pProxy, method, remoteCall.getParameters());
 
         } catch (final Throwable ex) {
             // Encapsulate the exception
             throw new ECFException("Error calling remote method: "
                     + ex.getMessage(), ex);
         }
-    }
-
-    /**
-     * Sets up the client according to the registration properties
-     */
-    private Client setupClient() {
-
-        // Get the accesses
-        final String[] accesses = Utilities.getAccesses((String) registration
-                .getProperty(JabsorbConstants.PROP_HTTP_ACCESSES));
-
-        // Get the first one
-        // FIXME: get the first **valid** one...
-        final String uri = accesses[0];
-        Utilities
-                .traceDebug("setupClient", getClass(),
-                        "Accesses: " + Arrays.toString(accesses)
-                                + "\nChosen..: " + uri);
-
-        // Prepare the session
-        final ISession session = TransportRegistry.i().createSession(uri);
-
-        // Set up the client
-        return new Client(session, pLoader);
-    }
+	}
 }

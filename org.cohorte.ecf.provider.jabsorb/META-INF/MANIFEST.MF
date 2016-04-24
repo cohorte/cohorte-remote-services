@@ -7,6 +7,18 @@ Bundle-Activator: org.cohorte.ecf.provider.jabsorb.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.servlet;version="2.6.0",
  org.cohorte.remote.utilities,
+ org.eclipse.ecf.core;version="3.0.0",
+ org.eclipse.ecf.core.identity;version="3.3.0",
+ org.eclipse.ecf.core.provider;version="3.1.0",
+ org.eclipse.ecf.core.security;version="3.1.0",
+ org.eclipse.ecf.core.sharedobject;version="2.3.0",
+ org.eclipse.ecf.core.util;version="3.5.0",
+ org.eclipse.ecf.provider.generic;version="4.3.0",
+ org.eclipse.ecf.remoteservice;version="7.3.0",
+ org.eclipse.ecf.remoteservice.asyncproxy,
+ org.eclipse.ecf.remoteservice.client;version="8.1.0",
+ org.eclipse.ecf.remoteservice.events;version="6.0.0",
+ org.eclipse.ecf.remoteservice.provider;version="1.0.0",
  org.eclipse.equinox.concurrent.future;version="1.1.0",
  org.jabsorb.ng,
  org.jabsorb.ng.client,
@@ -17,10 +29,5 @@ Import-Package: javax.servlet;version="2.6.0",
  org.osgi.service.remoteserviceadmin,
  org.osgi.util.tracker
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.ecf;bundle-version="3.2.0",
- org.eclipse.ecf.provider;bundle-version="4.4.0",
- org.eclipse.ecf.remoteservice;bundle-version="8.2.0",
- org.eclipse.equinox.common;bundle-version="3.6.200",
- org.eclipse.ecf.remoteservice.servlet;bundle-version="1.0.0",
- org.eclipse.ecf.sharedobject;bundle-version="2.4.0"
+Require-Bundle: org.eclipse.equinox.common
 Service-Component: OSGI-INF/httpservicecomponent.xml
