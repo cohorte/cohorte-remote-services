@@ -28,16 +28,16 @@ public interface JabsorbConstants {
 	/** Jabsorb server configuration type */
 	String SERVER_PROVIDER_CONFIG_TYPE = "ecf.jabsorb.server";
 
-	/** Host Service Property Specifying UriContext **/
-	String HOST_SVCPROP_URICONTEXT = "uriContext";
+	/** Server Service Property Specifying UriContext **/
+	String SERVER_SVCPROP_URICONTEXT = "uriContext";
 	
 	/** Default uriContext */
-	String HOST_DEFAULT_URICONTEXT = "http://localhost:8181";
+	String SERVER_DEFAULT_URICONTEXT = "http://localhost:8181";
 	
 	/** Default host servlet path */
-	String HOST_DEFAULT_SERVLETPATH = "/JABSORB-RPC";
+	String SERVER_DEFAULT_SERVLETPATH = "/JABSORB-RPC";
 
 	/** Jabsorb client configuration type */
-	String JABSORB_CLIENT_PROVIDER_CONFIG_TYPE = "ecf.jabsorb.client";
+	String CLIENT_PROVIDER_CONFIG_TYPE = "ecf.jabsorb.client";
 
 }

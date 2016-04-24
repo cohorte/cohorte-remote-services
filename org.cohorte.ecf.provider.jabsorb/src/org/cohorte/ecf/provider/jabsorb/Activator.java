@@ -120,21 +120,21 @@ public class Activator implements BundleActivator {
 		pContext.registerService(IRemoteServiceDistributionProvider.class,
 				new RemoteServiceDistributionProvider.Builder().setName(JabsorbConstants.SERVER_PROVIDER_CONFIG_TYPE)
 						.setInstantiator(new RemoteServiceContainerInstantiator(JabsorbConstants.SERVER_PROVIDER_CONFIG_TYPE,
-								JabsorbConstants.JABSORB_CLIENT_PROVIDER_CONFIG_TYPE) {
+								JabsorbConstants.CLIENT_PROVIDER_CONFIG_TYPE) {
 							@Override
 									public IContainer createInstance(ContainerTypeDescription description,
 											Map<String, ?> parameters) {
 										return new JabsorbHostContainer(
-												getParameterValue(parameters, JabsorbConstants.HOST_SVCPROP_URICONTEXT,
-														JabsorbConstants.HOST_DEFAULT_URICONTEXT)
-														+ JabsorbConstants.HOST_DEFAULT_SERVLETPATH);
+												getParameterValue(parameters, JabsorbConstants.SERVER_SVCPROP_URICONTEXT,
+														JabsorbConstants.SERVER_DEFAULT_URICONTEXT)
+														+ JabsorbConstants.SERVER_DEFAULT_SERVLETPATH);
 									}
 								}).setServer(true).setHidden(false).build(),
 				null);
 		pContext.registerService(IRemoteServiceDistributionProvider.class,
-				new RemoteServiceDistributionProvider.Builder().setName(JabsorbConstants.JABSORB_CLIENT_PROVIDER_CONFIG_TYPE)
+				new RemoteServiceDistributionProvider.Builder().setName(JabsorbConstants.CLIENT_PROVIDER_CONFIG_TYPE)
 						.setInstantiator(new RemoteServiceContainerInstantiator(JabsorbConstants.SERVER_PROVIDER_CONFIG_TYPE,
-								JabsorbConstants.JABSORB_CLIENT_PROVIDER_CONFIG_TYPE) {
+								JabsorbConstants.CLIENT_PROVIDER_CONFIG_TYPE) {
 							@Override
 							public IContainer createInstance(ContainerTypeDescription description,
 									Map<String, ?> parameters) {

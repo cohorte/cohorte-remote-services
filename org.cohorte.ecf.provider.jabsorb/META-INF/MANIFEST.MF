@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: COHORTE :: ECF :: Jabsorb Provider
 Bundle-SymbolicName: org.cohorte.ecf.provider.jabsorb;singleton:=true
-Bundle-Version: 1.2.1
+Bundle-Version: 1.3.0
 Bundle-Activator: org.cohorte.ecf.provider.jabsorb.Activator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: javax.servlet;version="2.6.0",
  org.cohorte.remote.utilities,
  org.eclipse.ecf.core;version="3.0.0",

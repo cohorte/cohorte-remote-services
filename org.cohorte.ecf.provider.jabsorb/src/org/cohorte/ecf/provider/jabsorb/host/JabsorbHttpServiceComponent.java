@@ -107,7 +107,7 @@ public class JabsorbHttpServiceComponent {
 
         // Register the Jabsorb servlet
         try {
-            aHttpService.registerServlet(JabsorbConstants.HOST_DEFAULT_SERVLETPATH,
+            aHttpService.registerServlet(JabsorbConstants.SERVER_DEFAULT_SERVLETPATH,
                     new JSONRPCServlet(), null, null);
 
         } catch (final ServletException ex) {
@@ -190,7 +190,7 @@ public class JabsorbHttpServiceComponent {
             final Map<String, ?> aProperties) {
 
         // Unregister the servlet from the lost service
-        aHttpService.unregister(JabsorbConstants.HOST_DEFAULT_SERVLETPATH);
+        aHttpService.unregister(JabsorbConstants.SERVER_DEFAULT_SERVLETPATH);
 
         // Forget the port
         final int port = extractHttpPort(aProperties);
