@@ -50,7 +50,7 @@ public class JabsorbHostContainer extends AbstractRSAContainer {
 			// Register the service to the bridge
 			pBridge.registerEndpoint(String.valueOf(registration.getServiceId()), registration.getService());
 		}
-        // No need for extra properties
+        // No extra properties
 		return null;
 	}
 

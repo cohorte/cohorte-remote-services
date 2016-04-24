@@ -81,30 +81,6 @@ public class Utilities {
 	}
 
 	/**
-	 * Prepares a string containing all access URIs, separated by
-	 * {@link #URI_SEPARATOR}
-	 * 
-	 * @param aAccessURIs
-	 *            A list of access URIs
-	 * @return A string (can be empty)
-	 */
-	public static String makeAccesses(final String[] aAccessURIs) {
-
-		final StringBuilder builder = new StringBuilder();
-		for (final String uri : aAccessURIs) {
-			// Separate URIs with a ','
-			builder.append(uri).append(',');
-		}
-
-		// Remove the trailing ','
-		if (builder.length() != 0) {
-			builder.deleteCharAt(builder.length() - 1);
-		}
-
-		return builder.toString();
-	}
-
-	/**
 	 * Traces a message using the ECF tracing API
 	 * 
 	 * @param aMethodName
