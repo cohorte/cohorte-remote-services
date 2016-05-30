@@ -15,11 +15,8 @@
  */
 package org.cohorte.ecf.provider.jabsorb.identity;
 
-import java.net.URI;
-
-import org.eclipse.ecf.core.identity.ID;
-import org.eclipse.ecf.core.identity.IDCreateException;
-import org.eclipse.ecf.core.identity.Namespace;
+import org.cohorte.ecf.provider.jabsorb.JabsorbConstants;
+import org.eclipse.ecf.core.identity.URIID.URIIDNamespace;
 
 /**
  * The Jabsorb default transport namespace (jabsorb://).
@@ -28,77 +25,27 @@ import org.eclipse.ecf.core.identity.Namespace;
  * 
  * @author Thomas Calmant
  */
-public class JabsorbNamespace extends Namespace {
+public class JabsorbNamespace extends URIIDNamespace {
 
-    /** Namespace scheme */
-    public static final String NAMESPACE_SCHEME = "jabsorb";
+	private static final long serialVersionUID = 4315928629875372101L;
+	private static JabsorbNamespace INSTANCE;
+	
+	/**
+	 * The singleton instance of this namespace is created (and registered
+	 * as a Namespace service) in the Activator class for this bundle.
+	 * The singleton INSTANCE may then be used by both server and client.
+	 */
+	public JabsorbNamespace() {
+		super(JabsorbConstants.NAMESPACE_NAME, "Jabsorb Namespace");
+		INSTANCE = this;
+	}
 
-    /** Serial UID */
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * Creates a new ID within this namespace.
-     * 
-     * @param parameters
-     *            the parameter to pass to the ID.
-     * @return the new ID
-     * @throws IDCreateException
-     *             if the creation fails.
-     * @see org.eclipse.ecf.core.identity.Namespace#createInstance(java.lang.Object[])
-     */
-    @Override
-    public ID createInstance(final Object[] parameters)
-            throws IDCreateException {
-
-        if (parameters == null || parameters.length != 1) {
-            throw new IDCreateException(
-                    "Incorrect parameters for Jabsorb ID creation");
-        }
-
-        try {
-            String uriString = getInitStringFromExternalForm(parameters);
-            if (uriString == null) {
-                uriString = (String) parameters[0];
-            }
-
-            return new JabsorbID(this, URI.create(uriString));
-
-        } catch (final Exception e) {
-            throw new IDCreateException("Could not create JabsorbID", e);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ecf.core.identity.Namespace#getScheme()
-     */
-    @Override
-    public String getScheme() {
-
-        return NAMESPACE_SCHEME;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ecf.core.identity.Namespace#getSupportedParameterTypes()
-     */
-    @SuppressWarnings("rawtypes")
-    @Override
-    public Class[][] getSupportedParameterTypes() {
-
-        return new Class[][] { { String.class } };
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ecf.core.identity.Namespace#getSupportedSchemes()
-     */
-    @Override
-    public String[] getSupportedSchemes() {
-
-        return new String[] { NAMESPACE_SCHEME };
-    }
+	public static JabsorbNamespace getInstance() {
+		return INSTANCE;
+	}
+	
+	@Override
+	public String getScheme() {
+		return "jabsorb";
+	}
 }

@@ -22,24 +22,22 @@ package org.cohorte.ecf.provider.jabsorb;
  */
 public interface JabsorbConstants {
 
-    /** Service ID on the remote side */
-    String ENDPOINT_SERVICE_ID = "endpoint.service.id ";
+	/** Jabsorb identity namespace */
+	String NAMESPACE_NAME = "ecf.namespace.jabsorb";
 
-    /** Path to the host servlet */
-    String HOST_SERVLET_PATH = "/JABSORB-RPC";
+	/** Jabsorb server configuration type */
+	String SERVER_PROVIDER_CONFIG_TYPE = "ecf.jabsorb.server";
 
-    /** Jabsorb identity namespace */
-    String IDENTITY_NAMESPACE = "ecf.namespace.jabsorb";
+	/** Server Service Property Specifying UriContext **/
+	String SERVER_SVCPROP_URICONTEXT = "uriContext";
+	
+	/** Default uriContext */
+	String SERVER_DEFAULT_URICONTEXT = "http://localhost:8181";
+	
+	/** Default host servlet path */
+	String SERVER_DEFAULT_SERVLETPATH = "/JABSORB-RPC";
 
-    /** Jabsorb configuration, as in plugin.xml */
-    String JABSORB_CONFIG = "ecf.jabsorb";
+	/** Jabsorb client configuration type */
+	String CLIENT_PROVIDER_CONFIG_TYPE = "ecf.jabsorb.client";
 
-    /** Array form of the configuration */
-    String[] JABSORB_CONFIGS = new String[] { JABSORB_CONFIG };
-
-    /** Name of the endpoint */
-    String PROP_ENDPOINT_NAME = JABSORB_CONFIG + ".name";
-
-    /** HTTP accesses (comma-separated URL String) */
-    String PROP_HTTP_ACCESSES = JABSORB_CONFIG + ".accesses";
 }

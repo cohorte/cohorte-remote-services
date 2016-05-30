@@ -15,7 +15,23 @@
  */
 package org.cohorte.ecf.provider.jabsorb;
 
+import java.net.URI;
+import java.util.Map;
+
+import org.cohorte.ecf.provider.jabsorb.client.JabsorbClientContainer;
+import org.cohorte.ecf.provider.jabsorb.host.JabsorbHostContainer;
+import org.cohorte.ecf.provider.jabsorb.host.JabsorbHttpSession;
+import org.cohorte.ecf.provider.jabsorb.identity.JabsorbNamespace;
+import org.eclipse.ecf.core.ContainerTypeDescription;
+import org.eclipse.ecf.core.IContainer;
+import org.eclipse.ecf.core.identity.Namespace;
 import org.eclipse.ecf.core.util.SystemLogService;
+import org.eclipse.ecf.remoteservice.provider.IRemoteServiceDistributionProvider;
+import org.eclipse.ecf.remoteservice.provider.RemoteServiceContainerInstantiator;
+import org.eclipse.ecf.remoteservice.provider.RemoteServiceDistributionProvider;
+import org.jabsorb.ng.client.HTTPSessionFactory;
+import org.jabsorb.ng.client.IHTTPSession;
+import org.jabsorb.ng.client.IHTTPSessionProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
@@ -28,101 +44,133 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class Activator implements BundleActivator {
 
-    /** The ID of this plugin */
-    public final static String PLUGIN_ID = "org.cohorte.ecf.provider.jabsorb";
+	/** The ID of this plugin */
+	public final static String PLUGIN_ID = "org.cohorte.ecf.provider.jabsorb";
 
-    /** This activator */
-    private static Activator sSingleton;
+	/** This activator */
+	private static Activator sSingleton;
 
-    /**
-     * Returns the activator singleton
-     * 
-     * @return the activator instance
-     */
-    public static Activator get() {
+	/**
+	 * Returns the activator singleton
+	 * 
+	 * @return the activator instance
+	 */
+	public static Activator get() {
 
-        return sSingleton;
-    }
+		return sSingleton;
+	}
 
-    /** The {@link LogService} tracker */
-    private ServiceTracker<LogService, LogService> logServiceTracker = null;
+	/** The {@link LogService} tracker */
+	private ServiceTracker<LogService, LogService> logServiceTracker = null;
 
-    /** Bundle context */
-    private BundleContext pContext;
+	/** Bundle context */
+	private BundleContext pContext;
 
-    /**
-     * Retrieves the bundle context
-     * 
-     * @return the bundle context
-     */
-    public BundleContext getContext() {
+	/**
+	 * Retrieves the bundle context
+	 * 
+	 * @return the bundle context
+	 */
+	public BundleContext getContext() {
 
-        return pContext;
-    }
+		return pContext;
+	}
 
-    /**
-     * Retrieves a log service
-     * 
-     * @return A {@link LogService}
-     */
-    private synchronized LogService getLogService() {
+	/**
+	 * Retrieves a log service
+	 * 
+	 * @return A {@link LogService}
+	 */
+	private synchronized LogService getLogService() {
 
-        if (logServiceTracker == null) {
-            logServiceTracker = new ServiceTracker<LogService, LogService>(
-                    pContext, LogService.class, null);
-            logServiceTracker.open();
-        }
+		if (logServiceTracker == null) {
+			logServiceTracker = new ServiceTracker<LogService, LogService>(pContext, LogService.class, null);
+			logServiceTracker.open();
+		}
 
-        LogService logService = logServiceTracker.getService();
-        if (logService == null) {
-            logService = new SystemLogService(PLUGIN_ID);
-        }
+		LogService logService = logServiceTracker.getService();
+		if (logService == null) {
+			logService = new SystemLogService(PLUGIN_ID);
+		}
 
-        return logService;
-    }
+		return logService;
+	}
 
-    /**
-     * Logs a message using the log service
-     * 
-     * @param aLevel
-     * @param aMessage
-     * @param aThrowable
-     */
-    public void log(final int aLevel, final String aMessage,
-            final Throwable aThrowable) {
+	/**
+	 * Logs a message using the log service
+	 * 
+	 * @param aLevel
+	 * @param aMessage
+	 * @param aThrowable
+	 */
+	public void log(final int aLevel, final String aMessage, final Throwable aThrowable) {
 
-        getLogService().log(aLevel, aMessage, aThrowable);
-    }
+		getLogService().log(aLevel, aMessage, aThrowable);
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext
-     * )
-     */
-    @Override
-    public void start(final BundleContext bundleContext) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext
+	 * )
+	 */
+	@Override
+	public void start(final BundleContext bundleContext) {
 
-        sSingleton = this;
-        pContext = bundleContext;
-    }
+		sSingleton = this;
+		pContext = bundleContext;
+        // Set the HTTP session provider
+        HTTPSessionFactory.setHTTPSessionProvider(new IHTTPSessionProvider() {
+			@Override
+			public IHTTPSession newHTTPSession(URI arg0) throws Exception {
+				return new JabsorbHttpSession(arg0);
+			}});
+        
+		pContext.registerService(Namespace.class, new JabsorbNamespace(), null);
+		// register this remote service distribution provider
+		pContext.registerService(IRemoteServiceDistributionProvider.class,
+				new RemoteServiceDistributionProvider.Builder().setName(JabsorbConstants.SERVER_PROVIDER_CONFIG_TYPE)
+						.setInstantiator(new RemoteServiceContainerInstantiator(JabsorbConstants.SERVER_PROVIDER_CONFIG_TYPE,
+								JabsorbConstants.CLIENT_PROVIDER_CONFIG_TYPE) {
+							@Override
+									public IContainer createInstance(ContainerTypeDescription description,
+											Map<String, ?> parameters) {
+										return new JabsorbHostContainer(
+												getParameterValue(parameters, JabsorbConstants.SERVER_SVCPROP_URICONTEXT,
+														JabsorbConstants.SERVER_DEFAULT_URICONTEXT)
+														+ JabsorbConstants.SERVER_DEFAULT_SERVLETPATH);
+									}
+								}).setServer(true).setHidden(false).build(),
+				null);
+		pContext.registerService(IRemoteServiceDistributionProvider.class,
+				new RemoteServiceDistributionProvider.Builder().setName(JabsorbConstants.CLIENT_PROVIDER_CONFIG_TYPE)
+						.setInstantiator(new RemoteServiceContainerInstantiator(JabsorbConstants.SERVER_PROVIDER_CONFIG_TYPE,
+								JabsorbConstants.CLIENT_PROVIDER_CONFIG_TYPE) {
+							@Override
+							public IContainer createInstance(ContainerTypeDescription description,
+									Map<String, ?> parameters) {
+								return new JabsorbClientContainer();
+							}
+						}).setServer(false).setHidden(false).build(),
+				null);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
-    @Override
-    public void stop(final BundleContext bundleContext) {
+	}
 
-        if (logServiceTracker != null) {
-            logServiceTracker.close();
-            logServiceTracker = null;
-        }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+	 */
+	@Override
+	public void stop(final BundleContext bundleContext) {
 
-        sSingleton = null;
-        pContext = null;
-    }
+		if (logServiceTracker != null) {
+			logServiceTracker.close();
+			logServiceTracker = null;
+		}
+		sSingleton = null;
+		pContext = null;
+	}
 }
