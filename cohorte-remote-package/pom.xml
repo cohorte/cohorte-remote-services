@@ -7,7 +7,7 @@
 		<groupId>org.cohorte.remote</groupId>
 		<artifactId>cohorte-remote-services</artifactId>
 		<version>1.2.1</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath>../Build/maven/pom.xml</relativePath>
 	</parent>
 	<artifactId>cohorte-remote-package</artifactId>
 
