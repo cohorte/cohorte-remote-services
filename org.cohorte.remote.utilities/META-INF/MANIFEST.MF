@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1502289185609
+Build-Jdk: 1.8.0_20
+Built-By: bdebbabi
+Bundle-ManifestVersion: 2
+Bundle-Name: COHORTE :: Remote Services :: Utilities
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.cohorte.remote.utilities
+Bundle-Vendor: COHORTE Technologies
+Bundle-Version: 1.2.1
+Created-By: Apache Maven Bundle Plugin
+Export-Package: org.cohorte.remote.utilities;uses:="org.osgi.framework"
+Import-Package: org.osgi.framework
+Tool: Bnd-2.1.0.20130426-122213

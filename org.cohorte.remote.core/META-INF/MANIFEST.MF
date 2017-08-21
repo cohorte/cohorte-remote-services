@@ -1,0 +1,81 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1502289186439
+Build-Jdk: 1.8.0_20
+Built-By: bdebbabi
+Bundle-ManifestVersion: 2
+Bundle-Name: COHORTE :: Remote Services :: Core
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.cohorte.remote.core
+Bundle-Vendor: COHORTE Technologies
+Bundle-Version: 1.2.1
+Created-By: Apache Maven Bundle Plugin & iPOJO 1.12.1
+Export-Package: org.cohorte.remote.core;uses:="org.cohorte.remote,org.
+ osgi.framework"
+Import-Package: org.apache.felix.ipojo, org.apache.felix.ipojo.archite
+ cture, org.cohorte.remote, org.cohorte.remote.utilities, org.osgi.fra
+ mework, org.osgi.service.cm, org.osgi.service.log
+Tool: Bnd-2.1.0.20130426-122213
+iPOJO-Components: instance { $name="cohorte-remote-dispatcher" $compon
+ ent="cohorte-remote-dispatcher-factory" }instance { $name="cohorte-re
+ mote-registry" $component="cohorte-remote-registry-factory" }componen
+ t { $name="cohorte-remote-dispatcher-factory" $classname="org.cohorte
+ .remote.core.ExportDispatcher" provides { $specifications="{org.cohor
+ te.remote.IExportsDispatcher}" }requires { $field="pExporters" $optio
+ nal="true" $id="exporters" callback { $method="bindExporter" $type="b
+ ind" }}requires { $field="pListeners" $optional="true" $id="listeners
+ " callback { $method="bindListener" $type="bind" }}requires { $field=
+ "pLogger" }callback { $transition="invalidate" $method="invalidate" }
+ callback { $transition="validate" $method="validate" }manipulation { 
+ $classname="org.cohorte.remote.core.ExportDispatcher" interface { $na
+ me="org.cohorte.remote.IExportsDispatcher" }interface { $name="org.os
+ gi.framework.ServiceListener" }field { $name="pBundleContext" $type="
+ org.osgi.framework.BundleContext" }field { $name="pEndpoints" $type="
+ java.util.Map" }field { $name="pExporters" $type="java.util.List" }fi
+ eld { $name="pFrameworkUid" $type="java.lang.String" }field { $name="
+ pListeners" $type="java.util.List" }field { $name="pLogger" $type="or
+ g.osgi.service.log.LogService" }field { $name="pServiceUids" $type="j
+ ava.util.Map" }field { $name="pUidExporter" $type="java.util.Map" }fi
+ eld { $name="pValidated" $type="boolean" }method { $name="bindExporte
+ r" $arguments="{org.cohorte.remote.IServiceExporter}" $names="{aExpor
+ ter}" }method { $name="bindListener" $arguments="{org.cohorte.remote.
+ IExportEndpointListener}" $names="{aListener}" }method { $name="compu
+ teEndpointName" $return="java.lang.String" $arguments="{java.lang.Str
+ ing,java.lang.Long}" $names="{aEndpointName,aServiceId}" }method { $n
+ ame="computeExportedConfigs" $return="java.lang.String[]" $arguments=
+ "{java.lang.Object}" $names="{aExportedConfigs}" }method { $name="exp
+ ortService" $arguments="{org.osgi.framework.ServiceReference}" $names
+ ="{aSvcRef}" }method { $name="getEndpoint" $return="org.cohorte.remot
+ e.ExportEndpoint" $arguments="{java.lang.String}" $names="{aUid}" }me
+ thod { $name="getEndpoints" $return="org.cohorte.remote.ExportEndpoin
+ t[]" }method { $name="getServiceUids" $return="java.util.Collection" 
+ $arguments="{org.osgi.framework.ServiceReference}" $names="{aReferenc
+ e}" }method { $name="invalidate" }method { $name="serviceChanged" $ar
+ guments="{org.osgi.framework.ServiceEvent}" $names="{aEvent}" }method
+  { $name="unexportService" $arguments="{org.osgi.framework.ServiceRef
+ erence}" $names="{aSvcRef}" }method { $name="updateService" $argument
+ s="{org.osgi.framework.ServiceReference}" $names="{aSvcRef}" }method 
+ { $name="validate" }}}component { $name="cohorte-remote-registry-fact
+ ory" $classname="org.cohorte.remote.core.ImportsRegistry" provides { 
+ $specifications="{org.cohorte.remote.IImportsRegistry}" }requires { $
+ field="pListeners" $optional="true" $id="listeners" callback { $metho
+ d="bindListener" $type="bind" }}requires { $field="pLogger" }callback
+  { $transition="invalidate" $method="invalidate" }callback { $transit
+ ion="validate" $method="validate" }manipulation { $classname="org.coh
+ orte.remote.core.ImportsRegistry" interface { $name="org.cohorte.remo
+ te.IImportsRegistry" }field { $name="pBundleContext" $type="org.osgi.
+ framework.BundleContext" }field { $name="pFrameworkUid" $type="java.l
+ ang.String" }field { $name="pFrameworks" $type="java.util.Map" }field
+  { $name="pListeners" $type="java.util.List" }field { $name="pLogger"
+  $type="org.osgi.service.log.LogService" }field { $name="pRegistry" $
+ type="java.util.Map" }field { $name="pValidated" $type="boolean" }met
+ hod { $name="add" $return="boolean" $arguments="{org.cohorte.remote.I
+ mportEndpoint}" $names="{aEndpoint}" }method { $name="addToFramework"
+  $arguments="{java.lang.String,org.cohorte.remote.ImportEndpoint}" $n
+ ames="{aFwUid,aEndpoint}" }method { $name="bindListener" $arguments="
+ {org.cohorte.remote.IImportEndpointListener}" $names="{aListener}" }m
+ ethod { $name="invalidate" }method { $name="lostFramework" $arguments
+ ="{java.lang.String}" $names="{aFrameworkUid}" }method { $name="remov
+ e" $arguments="{java.lang.String}" $names="{aUid}" }method { $name="u
+ pdate" $arguments="{java.lang.String,java.util.Map}" $names="{aUid,aN
+ ewProperties}" }method { $name="validate" }}}
+
