@@ -34,31 +34,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- iPOJO annotations definition -->
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.ipojo.annotations</artifactId>
-                <version>${ipojo-version}</version>
-            </dependency>
-
-            <!-- OSGi API -->
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
-                <version>${osgi-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.compendium</artifactId>
-                <version>${osgi-version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <build>
     	<plugins>	
+    		<!-- iPOJO -->
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-ipojo-plugin</artifactId>
+			</plugin>
 			<!-- tycho : maven -->
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
@@ -87,6 +69,25 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
+				<!-- iPOJO manipulation -->
+				<plugin>
+					<groupId>org.apache.felix</groupId>
+					<artifactId>maven-ipojo-plugin</artifactId>
+					<version>${ipojo-version}</version>
+					<configuration>
+						<!-- Add support for Tycho packaging -->
+						<m_supportedProjectTypes>
+							<type>eclipse-plugin</type>
+						</m_supportedProjectTypes>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>ipojo-bundle</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 				<!-- tycho : maven -->
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
